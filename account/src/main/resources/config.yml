@@ -1,0 +1,7 @@
+default:
+ credit:
+  account:
+   id=111111122
+ debit:
+  account:
+   id=111111123

@@ -1,0 +1,21 @@
+#spring.application.name=customer
+server:
+  port: 8082
+
+spring:
+  application:
+    name: customer
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/testdb
+    username: aashutosh
+    password: Bank@123
+    driverClassName: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+    show-sql: true

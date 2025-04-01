@@ -1,0 +1,27 @@
+package com.spring.customer.utils;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.math.BigInteger;
+
+@Entity
+@Table(name = "sequences")
+@Getter @Setter @AllArgsConstructor @NoArgsConstructor
+public class Sequence {
+  
+  @Id
+  @Column(name = "sequence_name")
+  private String sequenceName;
+  
+  @Column(name = "next_value")
+  private BigInteger nextValue;
+  @Column(name = "seq_id")
+  private int seqId;
+}
