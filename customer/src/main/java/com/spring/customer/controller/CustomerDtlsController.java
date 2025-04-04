@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Tag(name = "Omega Bank Customer Details Controller",
@@ -72,6 +73,14 @@ public class CustomerDtlsController {
     	return  ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(new ResponseDto(AccountsConstants.STATUS_200,AccountsConstants.MESSAGE_200));
+    }
+
+    @GetMapping("/customerSearch")
+    public ResponseEntity<List<CustomerDto>> getCustomerDetails(@RequestParam String customerType,
+                                                                @RequestParam LocalDate startDate,
+                                                                @RequestParam LocalDate endDate){
+        List<CustomerDto> customerDtoList = customerDetailsServices.findCustmerByDates(customerType, startDate, endDate);
+        return  ResponseEntity.ok(customerDtoList);
     }
     
     

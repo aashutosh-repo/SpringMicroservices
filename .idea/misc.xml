@@ -8,6 +8,7 @@
         <option value="$PROJECT_DIR$/account/pom.xml" />
         <option value="$PROJECT_DIR$/gateway/pom.xml" />
         <option value="$PROJECT_DIR$/customer/pom.xml" />
+        <option value="$PROJECT_DIR$/payments/pom.xml" />
         <option value="$PROJECT_DIR$/security/pom.xml" />
       </list>
     </option>

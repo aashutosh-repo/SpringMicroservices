@@ -14,8 +14,10 @@ public class CustomerDetailsMapper {
         customerDetailsDto.setFatherName(customerDetails.getFatherName());
         customerDetailsDto.setMotherName(customerDetails.getLastName());
         customerDetailsDto.setMail(customerDetails.getEmail());
+        customerDetailsDto.setCustomerCategory(customerDetails.getCustomerId().getCustomerType());
         customerDetailsDto.setMobileNumber(customerDetails.getMobileNumber());
         customerDetailsDto.setStatus(customerDetails.getStatus());
+        customerDetailsDto.setOnboardingDate(customerDetails.getCustCreationDt());
         customerDetailsDto.setDateOfBirth(customerDetails.getDateOfBirth());
         customerDetailsDto.setCustClsngDt(customerDetails.getCustClsngDt());
         customerDetailsDto.setRiskProfile(customerDetails.getRiskProfile());

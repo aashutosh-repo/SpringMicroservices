@@ -11,6 +11,7 @@
         <module name="security" />
         <module name="account" />
         <module name="customer" />
+        <module name="payments" />
       </profile>
       <profile name="Annotation profile for gateway" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -29,6 +30,7 @@
       <module name="core" options="-parameters" />
       <module name="customer" options="-parameters" />
       <module name="gateway" options="-parameters" />
+      <module name="payments" options="-parameters" />
       <module name="security" options="-parameters" />
     </option>
   </component>

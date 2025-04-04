@@ -22,6 +22,8 @@ public class GatewayConfig {
                         .uri("http://localhost:8083"))
                 .route("core-service", r -> r.path("/core/**")
                         .uri("http://localhost:8084"))
+                .route("payments-service", r -> r.path("/payments/**")
+                        .uri("http://localhost:8085"))
                 .route("swagger-ui", r -> r.path("/swagger-ui/**", "/v3/api-docs/**", "/v3/api-docs/swagger-config")
                         .uri("http://localhost:8081"))
                 .build();

@@ -27,6 +27,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 
 import java.math.BigInteger;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -69,12 +70,12 @@ public class CustomerDetailsServices implements CustomerServiceInterface {
 		custKey.setCustomerID(entityId.intValue());
 		custKey.setCustomerType(2);
 		customer_Details.setCustomerId(custKey);
-		customer_Details= detailsRepository.save(customer_Details);
+		customer_Details= detailsRepository.saveAndFlush(customer_Details);
 
 		//Documents Details Creation
 		doc.setDocId(documentId.intValue());
 		doc.setCustId(customer_Details.getCustomerId().getCustomerID());
-		docRepository.save(doc);
+//		docRepository.saveAndFlush(doc);
 		//create Nominee details
 		nomineeService.createNomineesDetails(nomineeDtoList,1);
 	}
@@ -91,6 +92,17 @@ public class CustomerDetailsServices implements CustomerServiceInterface {
 
 		return allCustDtoOut;
 	}
+
+	@Override
+	public List<CustomerDto> findCustmerByDates(String customerType, LocalDate startDate, LocalDate endDate) {
+		List<CustomerDetails> customerDetailsList= detailsRepository.findByCustomerCategoryAndCustCreationDtBetween(customerType,startDate,endDate);
+		List<CustomerDto> customerDtoList = new ArrayList<>();
+		for(CustomerDetails c: customerDetailsList){
+			customerDtoList.add(CustomerDetailsMapper.mapToCustomerDetailsDto(c, new CustomerDto()));
+		}
+		return customerDtoList;
+	}
+
 	@Cacheable(value = "customers", key = "#mobileNumber")
 	@Override
 	public CustomerDto findCustomerByMobileNumber(String mobileNumber) {
