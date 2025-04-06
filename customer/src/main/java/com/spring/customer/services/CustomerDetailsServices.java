@@ -6,6 +6,7 @@ import com.spring.customer.customer.CustomerID;
 import com.spring.customer.customer.DocumentsDetails;
 import com.spring.customer.customer.NomineeDetails;
 import com.spring.customer.dto.CustomerDto;
+import com.spring.customer.dto.CustomerSearchRequestDTO;
 import com.spring.customer.dto.DocumentsDtlsDto;
 import com.spring.customer.dto.NomineeDto;
 import com.spring.customer.error.ErrorCode;
@@ -22,6 +23,7 @@ import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -31,6 +33,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -94,13 +97,31 @@ public class CustomerDetailsServices implements CustomerServiceInterface {
 	}
 
 	@Override
-	public List<CustomerDto> findCustmerByDates(String customerType, LocalDate startDate, LocalDate endDate) {
-		List<CustomerDetails> customerDetailsList= detailsRepository.findByCustomerCategoryAndCustCreationDtBetween(customerType,startDate,endDate);
-		List<CustomerDto> customerDtoList = new ArrayList<>();
-		for(CustomerDetails c: customerDetailsList){
-			customerDtoList.add(CustomerDetailsMapper.mapToCustomerDetailsDto(c, new CustomerDto()));
+	public List<CustomerDto> searchCustomers(CustomerSearchRequestDTO requestDTO) {
+
+		Specification<CustomerDetails> spec = Specification.where(null);
+
+		if (requestDTO.getCustomerId() != null && !requestDTO.getCustomerId().isEmpty()) {
+			spec = spec.and(CustomerDetailsSpecification.hasCustomerId(requestDTO.getCustomerId()));
 		}
-		return customerDtoList;
+
+		if (requestDTO.getName() != null && !requestDTO.getName().isEmpty()) {
+			spec = spec.and(CustomerDetailsSpecification.hasName(requestDTO.getName()));
+		}
+
+		if (requestDTO.getStatus() != null && !requestDTO.getStatus().isEmpty()) {
+			spec = spec.and(CustomerDetailsSpecification.hasStatus(requestDTO.getStatus()));
+		}
+
+		if (requestDTO.getStartDate() != null && requestDTO.getEndDate() != null) {
+			spec = spec.and(CustomerDetailsSpecification.isBetweenDates(requestDTO.getStartDate(), requestDTO.getEndDate()));
+		}
+
+		List<CustomerDetails> customerDetailsList = detailsRepository.findAll(spec);
+
+		return customerDetailsList.stream()
+				.map(c -> CustomerDetailsMapper.mapToCustomerDetailsDto(c, new CustomerDto()))
+				.toList();
 	}
 
 	@Cacheable(value = "customers", key = "#mobileNumber")

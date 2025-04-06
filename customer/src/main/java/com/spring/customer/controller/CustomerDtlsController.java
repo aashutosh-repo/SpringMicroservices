@@ -3,6 +3,7 @@ package com.spring.customer.controller;
 
 import com.spring.customer.constants.AccountsConstants;
 import com.spring.customer.dto.CustomerDto;
+import com.spring.customer.dto.CustomerSearchRequestDTO;
 import com.spring.customer.dto.ResponseDto;
 import com.spring.customer.mapper.RequestWrapper;
 import com.spring.customer.services.CustomerAddressServices;
@@ -75,11 +76,9 @@ public class CustomerDtlsController {
                 .body(new ResponseDto(AccountsConstants.STATUS_200,AccountsConstants.MESSAGE_200));
     }
 
-    @GetMapping("/customerSearch")
-    public ResponseEntity<List<CustomerDto>> getCustomerDetails(@RequestParam String customerType,
-                                                                @RequestParam LocalDate startDate,
-                                                                @RequestParam LocalDate endDate){
-        List<CustomerDto> customerDtoList = customerDetailsServices.findCustmerByDates(customerType, startDate, endDate);
+    @PostMapping("/customerSearch")
+    public ResponseEntity<List<CustomerDto>> getCustomerDetails(@RequestBody CustomerSearchRequestDTO requestDTO){
+        List<CustomerDto> customerDtoList = customerDetailsServices.searchCustomers(requestDTO);
         return  ResponseEntity.ok(customerDtoList);
     }
     
