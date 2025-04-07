@@ -7,10 +7,8 @@ import javax.crypto.*;
 
 import javax.crypto.spec.GCMParameterSpec;
 import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.spec.InvalidParameterSpecException;
 import java.util.Base64;
 
 public class EncryptionUtil {

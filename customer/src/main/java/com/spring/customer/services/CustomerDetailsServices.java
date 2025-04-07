@@ -6,6 +6,7 @@ import com.spring.customer.customer.CustomerID;
 import com.spring.customer.customer.DocumentsDetails;
 import com.spring.customer.customer.NomineeDetails;
 import com.spring.customer.dto.CustomerDto;
+import com.spring.customer.dto.CustomerSearchRequestDTO;
 import com.spring.customer.dto.DocumentsDtlsDto;
 import com.spring.customer.dto.NomineeDto;
 import com.spring.customer.error.ErrorCode;
@@ -22,14 +23,17 @@ import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 
 import java.math.BigInteger;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -69,12 +73,12 @@ public class CustomerDetailsServices implements CustomerServiceInterface {
 		custKey.setCustomerID(entityId.intValue());
 		custKey.setCustomerType(2);
 		customer_Details.setCustomerId(custKey);
-		customer_Details= detailsRepository.save(customer_Details);
+		customer_Details= detailsRepository.saveAndFlush(customer_Details);
 
 		//Documents Details Creation
 		doc.setDocId(documentId.intValue());
 		doc.setCustId(customer_Details.getCustomerId().getCustomerID());
-		docRepository.save(doc);
+//		docRepository.saveAndFlush(doc);
 		//create Nominee details
 		nomineeService.createNomineesDetails(nomineeDtoList,1);
 	}
@@ -91,6 +95,35 @@ public class CustomerDetailsServices implements CustomerServiceInterface {
 
 		return allCustDtoOut;
 	}
+
+	@Override
+	public List<CustomerDto> searchCustomers(CustomerSearchRequestDTO requestDTO) {
+
+		Specification<CustomerDetails> spec = Specification.where(null);
+
+		if (requestDTO.getCustomerId() != null && !requestDTO.getCustomerId().isEmpty()) {
+			spec = spec.and(CustomerDetailsSpecification.hasCustomerId(requestDTO.getCustomerId()));
+		}
+
+		if (requestDTO.getName() != null && !requestDTO.getName().isEmpty()) {
+			spec = spec.and(CustomerDetailsSpecification.hasName(requestDTO.getName()));
+		}
+
+		if (requestDTO.getStatus() != null && !requestDTO.getStatus().isEmpty()) {
+			spec = spec.and(CustomerDetailsSpecification.hasStatus(requestDTO.getStatus()));
+		}
+
+		if (requestDTO.getStartDate() != null && requestDTO.getEndDate() != null) {
+			spec = spec.and(CustomerDetailsSpecification.isBetweenDates(requestDTO.getStartDate(), requestDTO.getEndDate()));
+		}
+
+		List<CustomerDetails> customerDetailsList = detailsRepository.findAll(spec);
+
+		return customerDetailsList.stream()
+				.map(c -> CustomerDetailsMapper.mapToCustomerDetailsDto(c, new CustomerDto()))
+				.toList();
+	}
+
 	@Cacheable(value = "customers", key = "#mobileNumber")
 	@Override
 	public CustomerDto findCustomerByMobileNumber(String mobileNumber) {

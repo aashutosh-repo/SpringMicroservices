@@ -15,6 +15,7 @@ import java.time.LocalDate;
 public class CustomerDetails {
 	@EmbeddedId
 	private CustomerID customerId; //PK
+	private String customerCategory;
 	private String firstName;
 	private String lastName;
 	private String fatherName;

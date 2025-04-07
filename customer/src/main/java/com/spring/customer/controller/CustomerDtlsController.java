@@ -3,6 +3,7 @@ package com.spring.customer.controller;
 
 import com.spring.customer.constants.AccountsConstants;
 import com.spring.customer.dto.CustomerDto;
+import com.spring.customer.dto.CustomerSearchRequestDTO;
 import com.spring.customer.dto.ResponseDto;
 import com.spring.customer.mapper.RequestWrapper;
 import com.spring.customer.services.CustomerAddressServices;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Tag(name = "Omega Bank Customer Details Controller",
@@ -72,6 +74,12 @@ public class CustomerDtlsController {
     	return  ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(new ResponseDto(AccountsConstants.STATUS_200,AccountsConstants.MESSAGE_200));
+    }
+
+    @PostMapping("/customerSearch")
+    public ResponseEntity<List<CustomerDto>> getCustomerDetails(@RequestBody CustomerSearchRequestDTO requestDTO){
+        List<CustomerDto> customerDtoList = customerDetailsServices.searchCustomers(requestDTO);
+        return  ResponseEntity.ok(customerDtoList);
     }
     
     

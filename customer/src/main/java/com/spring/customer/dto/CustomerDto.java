@@ -48,6 +48,9 @@ public class CustomerDto {
     protected LocalDate onboardingDate;
 
     @Schema(description = "Date when the account was closed", example = "2024-12-31")
+    protected int customerCategory;
+
+    @Schema(description = "Date when the account was closed", example = "2024-12-31")
     protected LocalDate custClsngDt;
 
     @NotNull(message = "Risk profile cannot be null")
