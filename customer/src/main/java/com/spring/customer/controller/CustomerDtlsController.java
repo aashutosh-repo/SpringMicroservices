@@ -81,6 +81,12 @@ public class CustomerDtlsController {
         List<CustomerDto> customerDtoList = customerDetailsServices.searchCustomers(requestDTO);
         return  ResponseEntity.ok(customerDtoList);
     }
+    @PostMapping("/customerSearchbydate")
+    public ResponseEntity<List<CustomerDto>> getCustomerDetailsBydate(@RequestParam  CustomerSearchRequestDTO requestDTO){
+        List<CustomerDto> customerDtoList = customerDetailsServices.searchCustomers(requestDTO);
+        return  ResponseEntity.ok(customerDtoList);
+    }
+
     
     
 }

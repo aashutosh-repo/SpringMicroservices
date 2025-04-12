@@ -11,15 +11,15 @@ public class CoreServiceClient {
 
     private final WebClient webClient;
 
-    public CoreServiceClient(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("http://localhost:8084/core").build(); // Replace with actual URL
-    }
-
-    public Mono<String> getDecryptedData(String encryptedPayload) {
-        return webClient.post()
-                .uri("/secureCard/tokenize")
-                .bodyValue(Collections.singletonMap("encryptedPayload", encryptedPayload))
-                .retrieve()
-                .bodyToMono(String.class);
-    }
+//    public CoreServiceClient(WebClient.Builder webClientBuilder) {
+//        this.webClient = webClientBuilder.baseUrl("http://localhost:8084/core").build(); // Replace with actual URL
+//    }
+//
+//    public Mono<String> getDecryptedData(String encryptedPayload) {
+//        return webClient.post()
+//                .uri("/secureCard/tokenize")
+//                .bodyValue(Collections.singletonMap("encryptedPayload", encryptedPayload))
+//                .retrieve()
+//                .bodyToMono(String.class);
+//    }
 }

@@ -5,7 +5,7 @@ spring:
   application:
     name: core
   datasource:
-    url: jdbc:mysql://localhost:3306/security
+    url: jdbc:mysql://localhost:3306/core
     username: aashutosh
     password: Bank@123
     driverClassName: com.mysql.cj.jdbc.Driver

@@ -1,0 +1,26 @@
+#spring.application.name=FileHandler
+server:
+  port: 8086
+
+spring:
+  application:
+    name: FileHandler
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: always
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/batchdb
+    username: aashutosh
+    password: Bank@123
+    driverClassName: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+    show-sql: true
