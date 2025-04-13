@@ -5,6 +5,7 @@ import jakarta.persistence.EntityManagerFactory;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
@@ -24,6 +25,10 @@ import javax.sql.DataSource;
 @Configuration
 @EnableTransactionManagement
 public class BatchDataSourceConfig {
+
+    //make it true when need to load Batch related Table in DB
+    @Value("${batch.schema-init:false}")
+    private boolean schemaInit;
 
     @Primary
     @Bean(name = "batchDataSource")
@@ -69,10 +74,15 @@ public class BatchDataSourceConfig {
     @Bean
     public DataSourceInitializer batchDataSourceInitializer(
             @Qualifier("batchDataSource") DataSource dataSource) {
+        DataSourceInitializer initializer = new DataSourceInitializer();
+
+        if (!schemaInit) {
+            initializer.setDataSource(dataSource);
+            return initializer; // Do nothing
+        }
         ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
         populator.addScript(new ClassPathResource("schema-mysql.sql"));
 
-        DataSourceInitializer initializer = new DataSourceInitializer();
         initializer.setDataSource(dataSource);
         initializer.setDatabasePopulator(populator);
         return initializer;

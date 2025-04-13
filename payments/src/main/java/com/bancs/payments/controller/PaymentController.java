@@ -3,6 +3,8 @@ package com.bancs.payments.controller;
 import com.bancs.payments.services.CoreServiceClient;
 import com.bancs.payments.services.EncryptionUtil;
 import lombok.AllArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,23 +22,31 @@ import java.util.Map;
 @AllArgsConstructor
 public class PaymentController {
 
+    private static final Logger log = LogManager.getLogger(PaymentController.class);
+    private static final String PAYLOAD= "payload";
     private final WebClient webClient;
     private final CoreServiceClient coreServiceClient;
 
 
     @PostMapping("/process-payment")
-    public ResponseEntity<String> processPayment(@RequestBody Map<String, String> requestData){
-
-        String encryptedPayload = requestData.get("encryptedPayload");
-
-//        Mono<ResponseEntity<String>> string = coreServiceClient.getDecryptedData(encryptedPayload)
-//                .map(decryptedData -> {
-//                    System.out.println("Decrypted Payment Data: " + decryptedData);
-//                    return ResponseEntity.ok("Payment Processed with Data: " + decryptedData);
-//                })
-//                .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().body("Decryption failed: " + e.getMessage())));
-//        System.out.println(string);
-        return ResponseEntity.ok("Transaction Successful");
+    public ResponseEntity<Map<String,String>> processPayment(@RequestBody Map<String, String> requestData){
+        try {
+            String encryptedPayload = requestData.get(PAYLOAD);
+            if (encryptedPayload == null || encryptedPayload.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of(PAYLOAD,"Missing encrypted payload"));
+            }
+            SecretKey secretKey = EncryptionUtil.getStaticKey();
+            log.info("Decryption in progress...");
+            String decryptedData = EncryptionUtil.decrypt(encryptedPayload, secretKey);
+            log.info("Decryption completed...");
+            log.info("The Decrypted data : {}",decryptedData);
+            // Further parse the decrypted data and process the payment logic
+            String resMessage = "Transaction Successful";
+            String encryptData = EncryptionUtil.encrypt(resMessage,secretKey);
+            return ResponseEntity.ok(Map.of(PAYLOAD, encryptData));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(PAYLOAD,"Error processing payment"));
+        }
     }
 
 
@@ -57,28 +67,18 @@ public class PaymentController {
     @PostMapping("/testPayment")
     public ResponseEntity<Map<String,String>> processPaymentTest(@RequestBody Map<String, String> requestData) {
         try {
-            // Extract the encrypted payload from the request data
-            String encryptedPayload = requestData.get("payload");
-
+            String encryptedPayload = requestData.get(PAYLOAD);
             if (encryptedPayload == null || encryptedPayload.isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of("payload","Missing encrypted payload"));
+                return ResponseEntity.badRequest().body(Map.of(PAYLOAD,"Missing encrypted payload"));
             }
             SecretKey secretKey = EncryptionUtil.getStaticKey();
-
-            // Decrypt the payload using the decryption utility
             String decryptedData = EncryptionUtil.decrypt(encryptedPayload, secretKey);
-
-            // Log decrypted data (or process it as per your requirement)
-            System.out.println("Decrypted Payment Data: " + decryptedData);
-
-            // Here you can parse the decrypted data and process the payment logic
-            // For now, we'll just simulate successful transaction processing
-
-            return ResponseEntity.ok(Map.of("payload", "Transaction Successful"));
+            // Further parse the decrypted data and process the payment logic
+            String resMessage = "Transaction Successful";
+            String encryptData = EncryptionUtil.encrypt(resMessage,secretKey);
+            return ResponseEntity.ok(Map.of(PAYLOAD, encryptData));
         } catch (Exception e) {
-            // Handle decryption or other errors
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("payload","Error processing payment"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(PAYLOAD,"Error processing payment"));
         }
     }
 

@@ -26,6 +26,7 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="FileHandler" options="-parameters" />
       <module name="account" options="-parameters" />
       <module name="core" options="-parameters" />
       <module name="customer" options="-parameters" />

@@ -1,7 +1,8 @@
 #spring.application.name=FileHandler
 server:
   port: 8086
-
+batch:
+  schema-init: false
 spring:
   application:
     name: FileHandler
@@ -9,7 +10,7 @@ spring:
     job:
       enabled: false
     jdbc:
-      initialize-schema: always
+      initialize-schema: never
 
   datasource:
     url: jdbc:mysql://localhost:3306/batchdb

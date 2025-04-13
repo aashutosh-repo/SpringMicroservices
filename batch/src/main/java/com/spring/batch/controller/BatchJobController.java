@@ -4,6 +4,8 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,11 +17,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class BatchJobController {
 
     private final JobLauncher jobLauncher;
-    private final Job importJob;
+    private final Job indiaPincodesJob;
+    private final Job indiaPopulationJob;
 
-    public BatchJobController(JobLauncher jobLauncher, Job importJob) {
+
+    @Autowired
+    public BatchJobController(JobLauncher jobLauncher, @Qualifier("indiaPincodesJob") Job indiaPincodesJob,
+                              @Qualifier("indiaPopulationJob") Job indiaPopulationJob) {
         this.jobLauncher = jobLauncher;
-        this.importJob = importJob;
+        this.indiaPincodesJob = indiaPincodesJob;
+        this.indiaPopulationJob = indiaPopulationJob;
     }
 
     @GetMapping("/run")
@@ -28,7 +35,20 @@ public class BatchJobController {
             JobParameters jobParameters = new JobParametersBuilder()
                     .addLong("startAt", System.currentTimeMillis()) // ensure uniqueness
                     .toJobParameters();
-            jobLauncher.run(importJob, jobParameters);
+            jobLauncher.run(indiaPincodesJob, jobParameters);
+            return ResponseEntity.ok("Batch job started successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to start batch job: " + e.getMessage());
+        }
+    }
+    @GetMapping("indiaCensus")
+    public ResponseEntity<String> runIndiaPopulationJob() {
+        try {
+            JobParameters jobParameters = new JobParametersBuilder()
+                    .addLong("startAt", System.currentTimeMillis()) // ensure uniqueness
+                    .toJobParameters();
+            jobLauncher.run(indiaPopulationJob, jobParameters);
             return ResponseEntity.ok("Batch job started successfully.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
