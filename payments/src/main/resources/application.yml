@@ -21,3 +21,6 @@ spring:
 logging:
   level:
     root: INFO
+core:
+  service:
+    url: http://localhost:8080

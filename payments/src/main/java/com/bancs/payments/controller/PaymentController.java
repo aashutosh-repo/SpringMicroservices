@@ -24,9 +24,7 @@ public class PaymentController {
 
     private static final Logger log = LogManager.getLogger(PaymentController.class);
     private static final String PAYLOAD= "payload";
-    private final WebClient webClient;
     private final CoreServiceClient coreServiceClient;
-
 
     @PostMapping("/process-payment")
     public ResponseEntity<Map<String,String>> processPayment(@RequestBody Map<String, String> requestData){
@@ -37,32 +35,20 @@ public class PaymentController {
             }
             SecretKey secretKey = EncryptionUtil.getStaticKey();
             log.info("Decryption in progress...");
+            String decrpt = coreServiceClient.callDecryptService(encryptedPayload);
             String decryptedData = EncryptionUtil.decrypt(encryptedPayload, secretKey);
-            log.info("Decryption completed...");
+              log.info("Decryption completed...");
+            log.info("The Decrypted data : {}",decrpt);
             log.info("The Decrypted data : {}",decryptedData);
             // Further parse the decrypted data and process the payment logic
             String resMessage = "Transaction Successful";
-            String encryptData = EncryptionUtil.encrypt(resMessage,secretKey);
+            String jsonResponse = String.format("{\"payload\": \"%s\"}", resMessage);
+            String encryptData = coreServiceClient.encrypt(resMessage);
             return ResponseEntity.ok(Map.of(PAYLOAD, encryptData));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(PAYLOAD,"Error processing payment"));
         }
     }
-
-
-
-//        String deToken= webClient.get()
-//                .uri(
-//        uriBuilder -> uriBuilder.path("api/token/detokenize")
-//                .queryParam("token", request.get("token"))
-//                .build())
-//                .retrieve()
-//                .bodyToMono(String.class)
-//                .block();
-//        System.out.println("Your Card Number is : "+deToken);
-
-//        return ResponseEntity.ok("payment Successful");
-//    }
 
     @PostMapping("/testPayment")
     public ResponseEntity<Map<String,String>> processPaymentTest(@RequestBody Map<String, String> requestData) {

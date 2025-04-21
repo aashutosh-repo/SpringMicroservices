@@ -2,19 +2,25 @@ package com.spring.core.utils;
 
 import com.spring.core.error.CustomErrorMessage;
 import com.spring.core.error.ErrorCode;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.*;
 
 import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
 
+@Component
 public class EncryptionUtil {
 
     private EncryptionUtil(){}
-
+    @Value("${spring.secure.key}")
+    private static String secretKey;
     private static final String ALGORITHM = "AES/GCM/NoPadding";
 
     // AES Key Size (256 bits)
@@ -36,7 +42,14 @@ public class EncryptionUtil {
             throw new RuntimeException("Unexpected error while generating AES key", e);
         }
     }
-
+//    public static SecretKey getStaticKey() {
+//        String secret = "mySuperSecretKey1234567890123456"; // must be 32 chars for 256-bit key
+//        return new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), "AES");
+//    }
+    public static SecretKey getSecretKeyFromString(String keyString) {
+        byte[] keyBytes = keyString.getBytes(StandardCharsets.UTF_8);
+        return new SecretKeySpec(keyBytes, "AES");
+    }
     private static byte[] generateIV() {
         byte[] iv = new byte[GCM_IV_LENGTH];
         new SecureRandom().nextBytes(iv);

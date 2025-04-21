@@ -33,8 +33,6 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Bean
     public WebClient webClient() {
-        return WebClient.builder()
-                .baseUrl("http://localhost:8080") // Example API
-                .build();
+        return WebClient.create("http://localhost:8080");
     }
 }

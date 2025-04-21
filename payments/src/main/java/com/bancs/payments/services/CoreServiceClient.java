@@ -1,25 +1,36 @@
 package com.bancs.payments.services;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
-import java.util.Collections;
+import java.util.Map;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CoreServiceClient {
-
     private final WebClient webClient;
 
-//    public CoreServiceClient(WebClient.Builder webClientBuilder) {
-//        this.webClient = webClientBuilder.baseUrl("http://localhost:8084/core").build(); // Replace with actual URL
-//    }
-//
-//    public Mono<String> getDecryptedData(String encryptedPayload) {
-//        return webClient.post()
-//                .uri("/secureCard/tokenize")
-//                .bodyValue(Collections.singletonMap("encryptedPayload", encryptedPayload))
-//                .retrieve()
-//                .bodyToMono(String.class);
-//    }
+    @Value("${core.service.url}")
+    private String coreServiceUrl;
+
+    public String encrypt(String plainText) {
+        return webClient.post()
+                .uri( "/core/encrypt")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(Map.of("payload", plainText))
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+    }
+
+    public String callDecryptService(String encryptedPayload) {
+        return webClient.post()
+                .uri("/core/decrypt")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(Map.of("payload", encryptedPayload))
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+    }
 }
