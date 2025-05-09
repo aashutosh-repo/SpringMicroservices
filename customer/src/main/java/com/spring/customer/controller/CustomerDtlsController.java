@@ -35,6 +35,8 @@ public class CustomerDtlsController {
     public List<CustomerDto> getAllCustomer(){
         return customerDetailsServices.getAllCust();
     }
+
+
     @Operation(summary = "Find Customer By Mobile Number API",
     description = "REST API to Find Customer By Mobile Number in Omega Bank")
     @GetMapping("/getCustomerByMobileNumber")

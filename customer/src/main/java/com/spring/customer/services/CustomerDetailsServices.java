@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 @Service
 @Transactional
 @AllArgsConstructor
@@ -53,7 +55,7 @@ public class CustomerDetailsServices implements CustomerServiceInterface {
 	private final SequenceGenerator sequenceGenerator;
 
 	@Override
-	@CacheEvict(value = "customers", key = "'allCustomers'", allEntries = false)
+	@CacheEvict(value = "allCustomersCache", key = "'allCustomers'", allEntries = false)
 	public void CreateCustDetails(CustomerDto inp_cust_details,
 								  DocumentsDtlsDto documentsDtlsDto, List<NomineeDto> nomineeDtoList){
 
@@ -83,17 +85,13 @@ public class CustomerDetailsServices implements CustomerServiceInterface {
 		nomineeService.createNomineesDetails(nomineeDtoList,1);
 	}
 
-	@Cacheable(value = "customers", key = "'allCustomers'")
+	@Cacheable(value = "allCustomersCache", key = "'allCustomers'")
 	@Override
 	public List<CustomerDto> getAllCust(){
 		List<CustomerDetails> allcust = detailsRepository.findAll();
-		List<CustomerDto> allCustDtoOut = new ArrayList<>();
-		for(CustomerDetails cust : allcust) {
-			CustomerDto customerDetailsSingle = CustomerDetailsMapper.mapToCustomerDetailsDto(cust, new CustomerDto());
-			allCustDtoOut.add(customerDetailsSingle);
-		}
-
-		return allCustDtoOut;
+		return allcust.stream()
+				.map(c -> CustomerDetailsMapper.mapToCustomerDetailsDto(c, new CustomerDto()))
+				.collect(Collectors.toList());
 	}
 
 	@Override
