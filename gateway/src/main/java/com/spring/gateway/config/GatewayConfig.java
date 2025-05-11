@@ -15,9 +15,9 @@ public class GatewayConfig {
 
                 // 🔹 Route for Security Service (Forward `/auth/security/**` to `8081`)
                 .route("security-service", r -> r.path("/auth/security/**")
-                        .uri("http://localhost:8081"))
+                        .uri("lb://security-service"))
                 .route("customer-service", r -> r.path("/customer/**")
-                        .uri("http://localhost:8082"))
+                        .uri("lb://customer-service"))
                 .route("account-service", r -> r.path("/account/**")
                         .uri("http://localhost:8083"))
                 .route("core-service", r -> r.path("/core/**")

@@ -10,6 +10,7 @@
         <module name="core" />
         <module name="security" />
         <module name="account" />
+        <module name="FileHandler" />
         <module name="customer" />
         <module name="payments" />
       </profile>
@@ -21,6 +22,7 @@
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/unknown/lombok-unknown.jar" />
         </processorPath>
         <module name="gateway" />
+        <module name="eureka" />
       </profile>
     </annotationProcessing>
   </component>
@@ -30,6 +32,7 @@
       <module name="account" options="-parameters" />
       <module name="core" options="-parameters" />
       <module name="customer" options="-parameters" />
+      <module name="eureka" options="-parameters" />
       <module name="gateway" options="-parameters" />
       <module name="payments" options="-parameters" />
       <module name="security" options="-parameters" />

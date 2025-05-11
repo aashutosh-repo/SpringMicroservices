@@ -2,24 +2,22 @@ package com.spring.core.controller;
 
 import com.opencsv.exceptions.CsvValidationException;
 import com.spring.core.services.HolidayServices;
-import com.spring.core.utils.Holidays;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
 @RestController
 @RequestMapping("/core/v1/holidays")
+@RequiredArgsConstructor
 public class HolidaysController {
 
-    @Autowired
     HolidayServices holidayservices;
 
     @GetMapping("getNextValidDate")
@@ -31,7 +29,6 @@ public class HolidaysController {
 
     @GetMapping("getHolidays")
     public ResponseEntity<List<LocalDate>> getHolidaysDates(){
-        Holidays holidays = new Holidays();
         List<LocalDate> allHolidays =  holidayservices.getHolidayList();
         return ResponseEntity.ok(allHolidays);
     }
