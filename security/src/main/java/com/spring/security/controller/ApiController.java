@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -32,14 +33,17 @@ public class ApiController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserRequestDTO request) {
+    public ResponseEntity<UserResponseDTO> login(@RequestBody UserRequestDTO request) {
         log.info(request.toString());
         String token = authService.authenticate(request.getUsername(), request.getPassword());
 
-        if (token == null) {
-            return ResponseEntity.status(401).body("Invalid credentials");
-        }
+        UserResponseDTO responseDTO =new UserResponseDTO();
+        responseDTO.setLastLogin(LocalDateTime.now());
+        responseDTO.setUserName(request.getUsername());
+//        if (token == null) {
+//            return ResponseEntity.status(401).body("Invalid credentials");
+//        }
 
-        return ResponseEntity.ok(new UserResponseDTO(token));
+        return ResponseEntity.ok(responseDTO);
     }
 }

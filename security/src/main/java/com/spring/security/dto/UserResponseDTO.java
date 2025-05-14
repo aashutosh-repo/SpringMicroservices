@@ -1,12 +1,16 @@
 package com.spring.security.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+
+import java.time.LocalDateTime;
 
 @Data
-@Getter @Setter @AllArgsConstructor
+@Getter @Setter
+@RequiredArgsConstructor
 public class UserResponseDTO {
     private String token;
+    private String userName;
+    private String firstName;
+    private String lastName;
+    private LocalDateTime lastLogin;
 }

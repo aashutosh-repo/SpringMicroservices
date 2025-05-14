@@ -18,7 +18,7 @@ public class CorsConfig {
         corsConfig.setAllowedOrigins(Collections.singletonList("*")); // Allow Angular frontend
         corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         corsConfig.setAllowedHeaders(Collections.singletonList("*"));
-        corsConfig.setAllowCredentials(false);
+        corsConfig.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfig);
