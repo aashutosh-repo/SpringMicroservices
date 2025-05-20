@@ -25,7 +25,7 @@ public class GatewayConfig {
                 .route("payments-service", r -> r.path("/payments/**")
                         .uri("lb://payments-service"))
                 .route("swagger-ui", r -> r.path("/swagger-ui/**", "/v3/api-docs/**", "/v3/api-docs/swagger-config")
-                        .uri("http://localhost:8081"))
+                        .uri("http://localhost:8082"))
                 .build();
     }
 }

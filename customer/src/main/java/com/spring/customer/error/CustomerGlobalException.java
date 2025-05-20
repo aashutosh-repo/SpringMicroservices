@@ -1,6 +1,7 @@
 package com.spring.customer.error;
 
 import com.spring.customer.dto.ErrorResponseDto;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -21,16 +22,16 @@ import java.util.Map;
 
 @ControllerAdvice
 public class CustomerGlobalException extends ResponseEntityExceptionHandler {
-        @ExceptionHandler(Exception.class)
-        public ResponseEntity<ErrorResponseDto> globalExceptionHandler(Exception ex, WebRequest request){
-            ErrorResponseDto response= new ErrorResponseDto(
-                    request.getDescription(false),
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    ex.getMessage(),
-                    LocalDateTime.now()
-            );
-            return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
-        }
+//        @ExceptionHandler(Exception.class)
+//        public ResponseEntity<ErrorResponseDto> globalExceptionHandler(Exception ex, WebRequest request){
+//            ErrorResponseDto response= new ErrorResponseDto(
+//                    request.getDescription(false),
+//                    HttpStatus.INTERNAL_SERVER_ERROR,
+//                    ex.getMessage(),
+//                    LocalDateTime.now()
+//            );
+//            return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+//        }
 
         @ExceptionHandler(AlreadyExistException.class)
         public ResponseEntity<ErrorResponseDto> alreadyExistException(AlreadyExistException ex, WebRequest request){
@@ -42,17 +43,24 @@ public class CustomerGlobalException extends ResponseEntityExceptionHandler {
             );
             return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
         }
-//        @ExceptionHandler(ResourceNotFoundException.class)
-//        public ResponseEntity<ErrorResponseDto> resourceNotFound(ResourceNotFoundException ex, WebRequest request){
-//            ErrorResponseDto response= new ErrorResponseDto(
-//                    request.getDescription(false),
-//                    HttpStatus.NOT_FOUND,
-//                    ex.getMessage(),
-//                    LocalDateTime.now()
-//            );
-//            return new ResponseEntity<>(response,HttpStatus.NOT_FOUND);
-//        }
-//
+    @ExceptionHandler(CustomerNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleCustomerNotFound(CustomerNotFoundException ex, HttpServletRequest request) {
+        ErrorResponse error = ex.getErrorResponse();
+        error.setPath(request.getRequestURI());
+        error.setTimestamp(LocalDateTime.now());
+        return new ResponseEntity<>(error, error.getErrorCode());
+    }
+        @ExceptionHandler(ResourceNotFoundException.class)
+        public ResponseEntity<ErrorResponseDto> resourceNotFound(ResourceNotFoundException ex, WebRequest request){
+            ErrorResponseDto response= new ErrorResponseDto(
+                    request.getDescription(false),
+                    HttpStatus.NOT_FOUND,
+                    ex.getMessage(),
+                    LocalDateTime.now()
+            );
+            return new ResponseEntity<>(response,HttpStatus.NOT_FOUND);
+        }
+
 //        @Override
 //        @ExceptionHandler(MethodArgumentNotValidException.class)
 //        protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
@@ -68,20 +76,20 @@ public class CustomerGlobalException extends ResponseEntityExceptionHandler {
 //            return new ResponseEntity<>(validationError,HttpStatus.BAD_REQUEST);
 //        }
 //
-//
-//
-//        @ExceptionHandler(IllegalArgumentException.class)
-//        public ResponseEntity<ErrorResponseDto> handleIllegalArgumentException(IllegalArgumentException ex, WebRequest request) {
-//        	ErrorResponseDto errorResponse = new ErrorResponseDto(
-//        			request.getDescription(false),
-//                    HttpStatus.BAD_REQUEST,
-//                    ex.getMessage(),
-//                    LocalDateTime.now()
-//            );
-//
-//            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-//        }
-//
+
+
+        @ExceptionHandler(IllegalArgumentException.class)
+        public ResponseEntity<ErrorResponseDto> handleIllegalArgumentException(IllegalArgumentException ex, WebRequest request) {
+        	ErrorResponseDto errorResponse = new ErrorResponseDto(
+        			request.getDescription(false),
+                    HttpStatus.BAD_REQUEST,
+                    ex.getMessage(),
+                    LocalDateTime.now()
+            );
+
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+
 //        @ExceptionHandler(ErrorHandler.class)
 //        public ResponseEntity<ErrorResponseDto> customError(ErrorHandler ex, WebRequest request){
 //        	ErrorResponseDto response= new ErrorResponseDto(
@@ -92,7 +100,7 @@ public class CustomerGlobalException extends ResponseEntityExceptionHandler {
 //            );
 //            return new ResponseEntity<>(response,HttpStatus.INTERNAL_SERVER_ERROR);
 //        }
-//
+
 //        @ExceptionHandler(CustomErrorMessage.class)
 //        public ResponseEntity<ErrorResponseDto> customErrorHandler(CustomErrorMessage ex, WebRequest request){
 //        	ErrorResponseDto response= new ErrorResponseDto(

@@ -1,6 +1,7 @@
 package com.spring.customer.controller;
 
 import com.spring.customer.customer.AddressID;
+import com.spring.customer.customer.CustomerDetails;
 import com.spring.customer.dto.CustomerAddressDto;
 import com.spring.customer.services.CustomerAddressServices;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,12 +19,12 @@ public class CustomerAddressController {
 	
 	@PostMapping("/create")
 	public void createAddressDetails(@RequestBody CustomerAddressDto custAddress ) {
-		cusServices.createModifyCustAddressDetails(custAddress);
+		cusServices.createModifyCustAddressDetails(custAddress, new CustomerDetails());
 	}
 	
 	@PutMapping("/modify")
 	public void modifyAddressDetails(@RequestBody CustomerAddressDto cust_address ) {
-		cusServices.createModifyCustAddressDetails(cust_address);
+		cusServices.createModifyCustAddressDetails(cust_address, new CustomerDetails());
 	}
 	
 	@GetMapping("/delete")

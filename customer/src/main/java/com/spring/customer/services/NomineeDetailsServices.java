@@ -1,6 +1,8 @@
 package com.spring.customer.services;
 
 
+import com.spring.customer.customer.CustomerDetails;
+import com.spring.customer.customer.CustomerKey;
 import com.spring.customer.customer.NomineeDetails;
 import com.spring.customer.dto.NomineeDto;
 import com.spring.customer.error.ResourceNotFoundException;
@@ -17,6 +19,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -27,17 +30,18 @@ public class NomineeDetailsServices implements NomineeServiceInterface {
 	private final SequenceGenerator sequenceGenerator;
 
     @Override
-	public List<NomineeDto> createNomineesDetails(List<NomineeDto> nomineeDetails, int flag)
+	public List<NomineeDto> createNomineesDetails(List<NomineeDto> nomineeDetails, CustomerDetails customerDetails, int flag)
 	{
 		NomineeDetails nominee_details;
 		List<NomineeDetails> nominee_detail_out = new ArrayList<>();
 		for(NomineeDto nominee : nomineeDetails) {
 			NomineeDetails nominee_details_temp;
-		nominee_details = NomineeMapper.mapToNominee(nominee, new NomineeDetails());
-		BigInteger nomineeId = sequenceGenerator.generateSequence("NomineeId_seq");
-		nominee_details.setNomineeId(nomineeId.intValue());
-		nominee_details_temp=nomineeRepository.save(nominee_details);
-		nominee_detail_out.add(nominee_details_temp);
+			nominee_details = NomineeMapper.mapToNominee(nominee, new NomineeDetails());
+			BigInteger nomineeId = sequenceGenerator.generateSequence("NomineeId_seq");
+			nominee_details.setNomineeId(nomineeId.intValue());
+			nominee_details.setCustomer(customerDetails);
+			nominee_details_temp=nomineeRepository.save(nominee_details);
+			nominee_detail_out.add(nominee_details_temp);
 		}
 		List<NomineeDto> nomineeDtos = new ArrayList<>();
 		for(NomineeDetails nomineeDetails1 : nominee_detail_out){
@@ -103,4 +107,12 @@ public class NomineeDetailsServices implements NomineeServiceInterface {
 		
 	}
 
+
+	public List<NomineeDto> findNomineeByCustomerId(CustomerKey key) {
+		List<NomineeDetails> nomineeDetailsList = nomineeRepository.findByCustomer_CustomerId_CustomerIdAndCustomer_CustomerId_CustomerType(key.getCustomerId(),key.getCustomerType());
+		return nomineeDetailsList.stream()
+				.map(nominee -> NomineeMapper.mpToNomineeDto(nominee, new NomineeDto()))
+				.toList();
+
+	}
 }

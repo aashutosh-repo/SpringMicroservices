@@ -1,20 +1,26 @@
 package com.spring.customer.customer;
 
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
+import com.spring.customer.audit.AuditInfo;
+import com.spring.customer.dto.NomineeDto;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.List;
 
 
 @Entity
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor
-public class CustomerDetails {
+public class CustomerDetails extends AuditInfo {
 	@EmbeddedId
-	private CustomerID customerId; //PK
+	@AttributeOverrides({
+			@AttributeOverride(name = "customerID", column = @Column(name = "customerID")),
+			@AttributeOverride(name = "customerType", column = @Column(name = "customerType"))
+	})
+	private CustomerKey customerId; //PK
 	private String customerCategory;
 	private String firstName;
 	private String lastName;
@@ -31,4 +37,12 @@ public class CustomerDetails {
 	private int riskProfile;
 	private LocalDate lastUpdate;
 	private String ratingAgency;
+	@OneToOne(mappedBy = "customer", cascade = CascadeType.ALL)
+	private CustomerAddressDetails address;
+
+	@OneToOne(mappedBy = "customer", cascade = CascadeType.ALL)
+	private DocumentsDetails document;
+
+	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+	private List<NomineeDetails> nominees;
 }

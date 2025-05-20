@@ -5,8 +5,10 @@ import org.springframework.data.jpa.domain.Specification;
 import java.time.LocalDate;
 
 public class CustomerDetailsSpecification {
-    public static Specification<CustomerDetails> hasCustomerId(String customerId) {
-        return (root, query, cb) -> customerId == null ? null : cb.equal(root.get("customerId"), customerId);
+        public static Specification<CustomerDetails> hasCustomerId(String customerId) {
+        return (root, query, cb) ->
+                customerId == null ? null :
+                        cb.equal(root.get("customerId").get("customerId"), customerId);
     }
 
     public static Specification<CustomerDetails> hasName(String name) {

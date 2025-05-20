@@ -9,7 +9,9 @@ public class CustomerDetailsMapper {
     }
 
     public static CustomerDto mapToCustomerDetailsDto(CustomerDetails customerDetails, CustomerDto customerDetailsDto) {
-		customerDetailsDto.setFirstName(customerDetails.getFirstName());
+		customerDetailsDto.setCustomerId(String.valueOf(customerDetails.getCustomerId().getCustomerId()));
+        customerDetailsDto.setCustomerType(String.valueOf(customerDetails.getCustomerId().getCustomerType()));
+        customerDetailsDto.setFirstName(customerDetails.getFirstName());
         customerDetailsDto.setLastName(customerDetails.getLastName());
         customerDetailsDto.setFatherName(customerDetails.getFatherName());
         customerDetailsDto.setMotherName(customerDetails.getLastName());

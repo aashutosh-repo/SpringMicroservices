@@ -1,9 +1,6 @@
 package com.spring.customer.customer;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -14,11 +11,16 @@ public class DocumentsDetails {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int docId; // Primary key
-	private int custId;
 	private String docDescription;
 	private String docIdentificationNumber;
 	private String docType;
 	private String DocTypeCode;
 	private LocalDate issueDate;
 	private LocalDate expiryDate;
+	@OneToOne
+	@JoinColumns({
+			@JoinColumn(name = "customerId", referencedColumnName = "customerId"),
+			@JoinColumn(name = "customerType", referencedColumnName = "customerType")
+	})
+	private CustomerDetails customer;
 }

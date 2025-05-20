@@ -9,7 +9,7 @@ public class DocumentDetailsMapper {
 	}
 
 	public static DocumentsDtlsDto mapToDocumentDetailsDto(DocumentsDetails documentDetails, DocumentsDtlsDto documentDetailsDto) {
-	        documentDetailsDto.setCustId(documentDetails.getCustId());
+//	        documentDetailsDto.setCustId(documentDetails.getCustId());
 	        documentDetailsDto.setDocDescription(documentDetails.getDocDescription());
 	        documentDetailsDto.setDocIdentificationNumber(documentDetails.getDocIdentificationNumber());
 	        documentDetailsDto.setDocType(documentDetails.getDocType());
@@ -21,7 +21,7 @@ public class DocumentDetailsMapper {
 	    }
 	    
 	    public static DocumentsDetails mapToDocumentDetails(DocumentsDtlsDto documentDetailsDto , DocumentsDetails documentDetails) {
-	        documentDetails.setCustId(documentDetailsDto.getCustId());
+//	        documentDetails.setCustId(documentDetailsDto.getCustId());
 	        documentDetails.setDocDescription(documentDetailsDto.getDocDescription());
 	        documentDetails.setDocIdentificationNumber(documentDetailsDto.getDocIdentificationNumber());
 	        documentDetails.setDocType(documentDetailsDto.getDocType());

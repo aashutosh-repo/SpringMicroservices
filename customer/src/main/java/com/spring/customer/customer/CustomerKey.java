@@ -1,15 +1,19 @@
 package com.spring.customer.customer;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.*;
 
 import java.io.Serializable;
 
 @Embeddable
-@Getter @Setter @EqualsAndHashCode
+@Data @EqualsAndHashCode
 @AllArgsConstructor @NoArgsConstructor
-public class CustomerID  implements Serializable{
-	private int customerID;
+public class CustomerKey  implements Serializable{
+	@Column(name = "customerId")
+	private int customerId;
+
+	@Column(name = "customerType")
 	private int customerType;
 }
 

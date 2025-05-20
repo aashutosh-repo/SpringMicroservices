@@ -10,7 +10,15 @@ import java.time.LocalDate;
 
 @Data
 public class CustomerDto {
-	
+
+    @NotEmpty(message = "Customer Id cannot be null or empty")
+    @Schema(description = "User's Customer Id", example = "CUST1234")
+    protected String customerId;
+
+    @NotEmpty(message = "Customer Type cannot be null or empty")
+    @Schema(description = "User's Customer Type", example = "1")
+    protected String customerType;
+
 	@NotEmpty(message = "First name cannot be null or empty")
     @Schema(description = "User's first name", example = "John")
     protected String firstName;
@@ -47,7 +55,7 @@ public class CustomerDto {
     @Schema(description = "Date when the user was onboarded", example = "2024-01-01")
     protected LocalDate onboardingDate;
 
-    @Schema(description = "Date when the account was closed", example = "2024-12-31")
+    @Schema(description = "Date when the account was closed", example = "1")
     protected int customerCategory;
 
     @Schema(description = "Date when the account was closed", example = "2024-12-31")

@@ -1,6 +1,7 @@
 package com.spring.customer.controller;
 
 
+import com.spring.customer.customer.CustomerDetails;
 import com.spring.customer.customer.NomineeDetails;
 import com.spring.customer.dto.NomineeDto;
 import com.spring.customer.mapper.NomineeMapper;
@@ -36,7 +37,7 @@ public class NomineeController {
     @PostMapping("/insert")
     public ResponseEntity<List<NomineeDto>> insertInto(@RequestBody List<NomineeDto> nominee){
     	List<NomineeDto> nominee_Details;
-    	nominee_Details=nomineeService.createNomineesDetails(nominee,1);
+    	nominee_Details=nomineeService.createNomineesDetails(nominee,new CustomerDetails(),1);
     	return ResponseEntity.ok(nominee_Details);
     }
     

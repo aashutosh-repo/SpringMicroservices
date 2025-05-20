@@ -18,7 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class HolidaysController {
 
-    HolidayServices holidayservices;
+    private final HolidayServices holidayservices;
 
     @GetMapping("getNextValidDate")
     public ResponseEntity<LocalDate> getValidDate(@RequestParam LocalDate dateinput,

@@ -1,8 +1,8 @@
 package com.spring.customer.customer;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ManyToAny;
 
 import java.time.LocalDate;
 
@@ -27,4 +27,10 @@ public class NomineeDetails {
     private int nomAddId;
     private String nomDocId;
     private int ver;
+    @ManyToOne
+    @JoinColumns({
+            @JoinColumn(name = "customerId", referencedColumnName = "customerId"),
+            @JoinColumn(name = "customerType", referencedColumnName = "customerType")
+    })
+    private CustomerDetails customer;
 }
