@@ -1,5 +1,6 @@
 package com.spring.batch.reader;
 
+import com.spring.batch.configuration.CustomFieldSetMapper;
 import com.spring.batch.demoentity.PopulationCensusIndia;
 import com.spring.batch.mapper.CleanPopulationCensusFieldSetMapper;
 import org.springframework.batch.item.file.FlatFileItemReader;
@@ -13,7 +14,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class GenericFlatFileReaderFactory {
 
-    public <T> FlatFileItemReader<T> buildReader(String filePath, Class<T> type, String[] columnNames, int linesToSkip) {
+    public <T> FlatFileItemReader<T> buildReader(String filePath,
+                                                 Class<T> type,
+                                                 String[] columnNames,
+                                                 int linesToSkip) {
         FlatFileItemReader<T> reader = new FlatFileItemReader<>();
         reader.setResource(new ClassPathResource(filePath));
         reader.setLinesToSkip(linesToSkip);
@@ -24,21 +28,13 @@ public class GenericFlatFileReaderFactory {
         tokenizer.setNames(columnNames);
         lineMapper.setLineTokenizer(tokenizer);
         if (type == PopulationCensusIndia.class) {
-            // Use custom mapper for PopulationCensusIndia
             lineMapper.setFieldSetMapper((FieldSetMapper<T>) new CleanPopulationCensusFieldSetMapper());
         } else {
             // Default mapper for all other types
             BeanWrapperFieldSetMapper<T> mapper = new BeanWrapperFieldSetMapper<>();
             mapper.setTargetType(type);
-            lineMapper.setFieldSetMapper(mapper);
+            lineMapper.setFieldSetMapper(new CustomFieldSetMapper<>(type));
         }
-
-//        BeanWrapperFieldSetMapper<T> fieldSetMapper = new BeanWrapperFieldSetMapper<>();
-//        fieldSetMapper.setTargetType(type);
-//
-//        lineMapper.setLineTokenizer(tokenizer);
-//        lineMapper.setFieldSetMapper(fieldSetMapper);
-
         reader.setLineMapper(lineMapper);
         return reader;
     }
