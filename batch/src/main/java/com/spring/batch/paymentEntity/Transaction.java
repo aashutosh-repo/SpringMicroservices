@@ -1,4 +1,4 @@
-package com.spring.batch.demoentity;
+package com.spring.batch.paymentEntity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

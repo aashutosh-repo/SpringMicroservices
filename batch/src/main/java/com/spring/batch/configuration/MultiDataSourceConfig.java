@@ -58,6 +58,38 @@ public class MultiDataSourceConfig {
         return new JpaTransactionManager(emf);
     }
 
+
+    // ========== Payments ==========
+    @Bean(name = "paymentsDataSource")
+    public DataSource paymentsDataSource(
+            @Value("${payments.datasource.url}") String url) {
+        return DataSourceBuilder.create()
+                .url(url)
+                .username(username)
+                .password(password)
+                .driverClassName(driverClassName)
+                .build();
+    }
+
+    @Bean(name = "paymentsEntityManagerFactory")
+    public LocalContainerEntityManagerFactoryBean paymentsEntityManagerFactory(
+            EntityManagerFactoryBuilder builder,
+            @Qualifier("paymentsDataSource") DataSource dataSource) {
+        return builder
+                .dataSource(dataSource)
+                .packages("com.spring.batch.paymentEntity")
+                .persistenceUnit("payments")
+                .build();
+    }
+
+    @Bean(name = "paymentsTransactionManager")
+    public PlatformTransactionManager paymentsTransactionManager(
+            @Qualifier("paymentsEntityManagerFactory") EntityManagerFactory emf) {
+        return new JpaTransactionManager(emf);
+    }
+
+
+
     // ========== SECURITY ==========
 //    @Bean(name = "securityDataSource")
 //    public DataSource securityDataSource(

@@ -1,7 +1,7 @@
 package com.spring.batch.reader;
 
 import com.spring.batch.configuration.InputFileProperties;
-import com.spring.batch.demoentity.Transaction;
+import com.spring.batch.paymentEntity.Transaction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.mapping.FieldSetMapper;

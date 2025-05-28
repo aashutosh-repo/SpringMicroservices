@@ -1,6 +1,6 @@
 package com.spring.batch.processor;
 
-import com.spring.batch.demoentity.Transaction;
+import com.spring.batch.paymentEntity.Transaction;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

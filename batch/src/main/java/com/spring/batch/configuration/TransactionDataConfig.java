@@ -1,13 +1,9 @@
 package com.spring.batch.configuration;
 
-import com.spring.batch.FileWriter.IndiaPopulationWriter;
 import com.spring.batch.FileWriter.TransactionWriter;
-import com.spring.batch.demoentity.PopulationCensusIndia;
-import com.spring.batch.demoentity.Transaction;
+import com.spring.batch.paymentEntity.Transaction;
 import com.spring.batch.listner.JobCompletionNotificationListener;
-import com.spring.batch.processor.PopulationCensusProcessor;
 import com.spring.batch.processor.TransactionProcessor;
-import com.spring.batch.reader.IndiaPopulationReader;
 import com.spring.batch.reader.TransactionReader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;

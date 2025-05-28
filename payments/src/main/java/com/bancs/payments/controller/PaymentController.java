@@ -1,20 +1,20 @@
 package com.bancs.payments.controller;
 
+import com.bancs.payments.dto.TransactionDTO;
 import com.bancs.payments.services.CoreServiceClient;
 import com.bancs.payments.services.EncryptionUtil;
+import com.bancs.payments.services.PaymentService;
 import lombok.AllArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import javax.crypto.SecretKey;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -25,6 +25,7 @@ public class PaymentController {
     private static final Logger log = LogManager.getLogger(PaymentController.class);
     private static final String PAYLOAD= "payload";
     private final CoreServiceClient coreServiceClient;
+    private final PaymentService paymentService;
 
     @PostMapping("/process-payment")
     public ResponseEntity<Map<String,String>> processPayment(@RequestBody Map<String, String> requestData){
@@ -66,6 +67,12 @@ public class PaymentController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(PAYLOAD,"Error processing payment"));
         }
+    }
+
+    @GetMapping("/getPaymentDetails")
+    public ResponseEntity<List<TransactionDTO>> getTransactionDetails(){
+        List<TransactionDTO> transactionDTOList =  paymentService.getTransactionDetails();
+        return ResponseEntity.ok(transactionDTOList);
     }
 
 

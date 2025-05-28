@@ -1,7 +1,7 @@
 package com.spring.batch.FileWriter;
 
-import com.spring.batch.demoentity.Transaction;
-import com.spring.batch.repositories.demography.TranactionRepository;
+import com.spring.batch.paymentEntity.Transaction;
+import com.spring.batch.repositories.payment.TranactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
