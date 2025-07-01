@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +32,16 @@ public class CustomerGlobalException extends ResponseEntityExceptionHandler {
             );
             return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
         }
+    @ExceptionHandler(NoSuchAlgorithmException.class)
+    public ResponseEntity<ErrorResponseDto> handleNoSuchAlgorithm(NoSuchAlgorithmException ex, WebRequest request) {
+        ErrorResponseDto error = new ErrorResponseDto(
+                request.getDescription(false),
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
         @ExceptionHandler(AlreadyExistException.class)
         public ResponseEntity<ErrorResponseDto> alreadyExistException(AlreadyExistException ex, WebRequest request){

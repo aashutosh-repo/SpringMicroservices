@@ -42,10 +42,6 @@ public class EncryptionUtil {
             throw new RuntimeException("Unexpected error while generating AES key", e);
         }
     }
-//    public static SecretKey getStaticKey() {
-//        String secret = "mySuperSecretKey1234567890123456"; // must be 32 chars for 256-bit key
-//        return new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), "AES");
-//    }
     public static SecretKey getSecretKeyFromString(String keyString) {
         byte[] keyBytes = keyString.getBytes(StandardCharsets.UTF_8);
         return new SecretKeySpec(keyBytes, "AES");

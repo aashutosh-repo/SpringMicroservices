@@ -17,7 +17,7 @@ public class DataAnalysisController {
     private final IndiaPopulationRepository populationRepository;
 
     @GetMapping("/census")
-    public ResponseEntity<List<PopulationCensusIndia>> getCesusData(){
+    public ResponseEntity<List<PopulationCensusIndia>> getCenusData(){
         List<PopulationCensusIndia> censusIndias= populationRepository.findAll();
         return ResponseEntity.ok(censusIndias);
     }

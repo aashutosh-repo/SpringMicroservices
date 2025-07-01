@@ -2,9 +2,12 @@ package com.spring.core.controller;
 
 import com.spring.core.services.DataSecurityService;
 import com.spring.core.services.TokenizationService;
+import com.spring.core.utils.CardMaskUtil;
 import com.spring.core.utils.EncryptionUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.TypeCollector;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,11 +25,6 @@ public class TokenizationController {
     @Autowired
     private DataSecurityService securityService;
 
-    public TokenizationController(TokenizationService tokenizationService, DataSecurityService securityService) {
-        this.tokenizationService = tokenizationService;
-        this.securityService = securityService;
-    }
-
     @PostMapping("/secureCard/tokenize")
     public String tokenizeCard(@RequestParam String cardNumber) throws Exception {
         return tokenizationService.tokenizeCard(cardNumber);
@@ -35,6 +33,12 @@ public class TokenizationController {
     @GetMapping("/secureCard/detokenize")
     public String detokenize(@RequestParam String token) throws Exception {
         return tokenizationService.detokenize(token);
+    }
+
+    @GetMapping("/cardMasking")
+    public ResponseEntity<String> cardMasking(@RequestBody String cardNumber){
+        String maskedCard= CardMaskUtil.maskCardNumber(cardNumber);
+        return ResponseEntity.ok(maskedCard);
     }
 
 
