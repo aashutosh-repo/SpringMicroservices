@@ -7,17 +7,14 @@ import com.spring.customer.error.CustomerNotFoundException;
 import com.spring.customer.error.ErrorCode;
 import com.spring.customer.error.ErrorResponse;
 import com.spring.customer.error.ResourceNotFoundException;
-import com.spring.customer.mapper.AddressMapper;
 import com.spring.customer.mapper.CustomerDetailsMapper;
 import com.spring.customer.mapper.DocumentDetailsMapper;
-import com.spring.customer.repository.Customer_Address_Repository;
 import com.spring.customer.repository.Customer_Details_Repository;
 import com.spring.customer.repository.DocumentsRepository;
 import com.spring.customer.services.si.CustomerServiceInterface;
 import com.spring.customer.utils.SequenceGenerator;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -35,8 +32,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toList;
 
 @Service
 @Transactional
@@ -73,10 +68,13 @@ public class CustomerDetailsServices implements CustomerServiceInterface {
 		doc = DocumentDetailsMapper.mapToDocumentDetails(documentsDtlsDto, new DocumentsDetails());
 
 		BigInteger entityId = sequenceGenerator.generateSequence("CustomerID_seq");
-		BigInteger documentId = sequenceGenerator.generateSequence("DocumentID_seq");
 		CustomerKey customerKeyKey = new CustomerKey();
-		customerKeyKey.setCustomerId(entityId.intValue());
-		customerKeyKey.setCustomerType(inp_cust_details.getCustomerCategory());
+		customerKeyKey.setCustomerId("CUST000"+entityId.toString());
+		if(inp_cust_details.getCustomerType() == null){
+			customerKeyKey.setCustomerType(1);
+		}else{
+			customerKeyKey.setCustomerType(inp_cust_details.getCustomerCategory());
+		}
 		customer_Details.setCustomerId(customerKeyKey);
 		customer_Details.setCustCreationDt(LocalDate.now());
 		customer_Details= detailsRepository.saveAndFlush(customer_Details);
@@ -125,7 +123,7 @@ public class CustomerDetailsServices implements CustomerServiceInterface {
 		for(CustomerDetails customer :  customerDetailsList){
 			ResponseWrapperDto response = new ResponseWrapperDto();
 			CustomerKey key = customer.getCustomerId();
-			int customerId = key.getCustomerId();
+			String customerId = key.getCustomerId();
 			int customerType= key.getCustomerType();
 			CustomerAddressDto addressDto = addressServices.findAddressByCustomerID(customerId,customerType);
 			DocumentsDtlsDto documentsDto = documentsServices.getDocumentsByCustomerId(key);
@@ -143,14 +141,14 @@ public class CustomerDetailsServices implements CustomerServiceInterface {
 
 	public ResponseWrapperDto searchSingleCustomerData(String customerId, String  customerType) {
 		CustomerKey key = new CustomerKey();
-		key.setCustomerId(Integer.parseInt(customerId));
+		key.setCustomerId(customerId);
 		key.setCustomerType(Integer.parseInt(customerType));
 
 		Optional<CustomerDetails> customerDetails = detailsRepository.findById(key);
 
 		if(customerDetails.isPresent()) {
 			ResponseWrapperDto response = new ResponseWrapperDto();
-			CustomerAddressDto addressDto = addressServices.findAddressByCustomerID(Integer.parseInt(customerId), Integer.parseInt(customerType));
+			CustomerAddressDto addressDto = addressServices.findAddressByCustomerID(customerId, Integer.parseInt(customerType));
 			DocumentsDtlsDto documentsDto = documentsServices.getDocumentsByCustomerId(key);
 			List<NomineeDto> nomineeDtoList = nomineeService.findNomineeByCustomerId(key);
 			CustomerDto customerDto = CustomerDetailsMapper.mapToCustomerDetailsDto(customerDetails.get(), new CustomerDto());
@@ -176,7 +174,7 @@ public class CustomerDetailsServices implements CustomerServiceInterface {
 
 	@CachePut(value = "customers", key = "#customerInp.mobileNumber")
 	@Override
-	public CustomerDto modifyCustomer(CustomerDto customerInp, int customerId,int customerType) {
+	public CustomerDto modifyCustomer(CustomerDto customerInp, String customerId,int customerType) {
 		CustomerKey customerKey = new CustomerKey(customerId,customerType);
 		CustomerDto cDto = new CustomerDto();
 		CustomerDetails customer;

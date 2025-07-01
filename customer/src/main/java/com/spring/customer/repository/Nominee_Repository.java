@@ -14,6 +14,6 @@ import java.util.Optional;
 public interface Nominee_Repository extends JpaRepository<NomineeDetails, Integer> {
 	List<NomineeDetails> findByOwnerId(int ownerId);
 	Optional<NomineeDetails> findByNomineeRefNum(int nomineeRefNum);
-	List<NomineeDetails> findByCustomer_CustomerId_CustomerIdAndCustomer_CustomerId_CustomerType(int customerId, int customerType);
+	List<NomineeDetails> findByCustomer_CustomerId_CustomerIdAndCustomer_CustomerId_CustomerType(String customerId, int customerType);
 
 }

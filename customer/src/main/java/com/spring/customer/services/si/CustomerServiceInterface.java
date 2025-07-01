@@ -13,7 +13,7 @@ public interface CustomerServiceInterface {
 									  DocumentsDtlsDto docDtls,
 									  List<NomineeDto> nomineeDtoList);
 	CustomerDto findCustomerByMobileNumber(String mobile);
-	CustomerDto modifyCustomer(CustomerDto cuatomerInp, int CustomerId,int CustomerType);
+	CustomerDto modifyCustomer(CustomerDto customerInp, String customerId,int customerType);
 	List<CustomerDto> getAllCust();
 
     List<ResponseWrapperDto> searchCustomers(CustomerSearchRequestDTO requestDTO);

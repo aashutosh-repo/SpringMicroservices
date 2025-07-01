@@ -11,6 +11,6 @@ import java.util.Optional;
 @Repository
 @Transactional
 public interface DocumentsRepository extends JpaRepository<DocumentsDetails, Integer> {
-    Optional<DocumentsDetails> findByCustomer_CustomerId_CustomerIdAndCustomer_CustomerId_CustomerType(int customerId, int customerType);
+    Optional<DocumentsDetails> findByCustomer_CustomerId_CustomerIdAndCustomer_CustomerId_CustomerType(String customerId, int customerType);
 
 }

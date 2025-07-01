@@ -11,7 +11,7 @@ import java.io.Serializable;
 @AllArgsConstructor @NoArgsConstructor
 public class CustomerKey  implements Serializable{
 	@Column(name = "customerId")
-	private int customerId;
+	private String customerId;
 
 	@Column(name = "customerType")
 	private int customerType;

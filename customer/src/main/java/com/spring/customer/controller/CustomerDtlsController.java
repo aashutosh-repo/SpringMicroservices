@@ -70,8 +70,8 @@ public class CustomerDtlsController {
     )
     @PutMapping("/modify-Customer")
     public ResponseEntity<ResponseDto> modifyDetails(@RequestBody CustomerDto customerDetails,
-    		@RequestParam int cust_id, @RequestParam int CustomerType){
-    	customerDetailsServices.modifyCustomer(customerDetails, cust_id, CustomerType);
+    		@RequestParam String customerId, @RequestParam int customerType){
+    	customerDetailsServices.modifyCustomer(customerDetails, customerId, customerType);
 
     	return  ResponseEntity
                 .status(HttpStatus.CREATED)
