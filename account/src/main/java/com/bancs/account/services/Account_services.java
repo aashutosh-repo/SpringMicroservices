@@ -176,7 +176,7 @@ public class Account_services implements Account_Service_Interface {
 
 	@Override
 	@Cacheable(value = "accountByCustomerId", key = "#customerId")
-	public List<AccountDto> getAccountByCustomerId(int customerId){
+	public List<AccountDto> getAccountByCustomerId(String customerId){
 		List<Account> accounts;
 		accounts= account_repository.findByCustId(customerId);
 		List<AccountDto> accountDtos = new ArrayList<>(List.of());

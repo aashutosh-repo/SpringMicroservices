@@ -1,5 +1,6 @@
 package com.bancs.payments.controller;
 
+import com.bancs.payments.dto.PaymentSummary;
 import com.bancs.payments.dto.TransactionDTO;
 import com.bancs.payments.services.CoreServiceClient;
 import com.bancs.payments.services.EncryptionUtil;
@@ -73,6 +74,14 @@ public class PaymentController {
     public ResponseEntity<List<TransactionDTO>> getTransactionDetails(){
         List<TransactionDTO> transactionDTOList =  paymentService.getTransactionDetails();
         return ResponseEntity.ok(transactionDTOList);
+    }
+
+    @GetMapping("/initiate")
+    public Mono<PaymentSummary> initiatePayment(
+            @RequestParam String customerId,
+            @RequestParam String accountId
+    ) {
+        return paymentService.initiatePayment(customerId, accountId);
     }
 
 

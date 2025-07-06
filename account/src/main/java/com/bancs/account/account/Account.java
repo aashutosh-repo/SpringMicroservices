@@ -20,7 +20,7 @@ public class Account extends AuditInfo {
 	protected String accountNumber;
 	protected LocalDate account_open_dt;
 	protected String currency;
-	protected int custId;
+	protected String custId;
 	protected int cus_type;
 	protected int npa_status;
 	protected int min_bal;

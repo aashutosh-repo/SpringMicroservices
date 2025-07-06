@@ -40,8 +40,8 @@ public class AccountController {
     @Operation(summary = "View All Accounts API",
             description = "REST API to View account By CustomerId in MyBank")
     @GetMapping("/viewAccountByCustomerId")
-    public List<AccountDto> viewAccountByCustomerId(int customerId){
-        return acc_services.getAccountByCustomerId(customerId);
+    public ResponseEntity<List<AccountDto>> viewAccountByCustomerId(String customerId){
+        return ResponseEntity.ok(acc_services.getAccountByCustomerId(customerId));
     }
     @Operation(summary = "Create Account API",
     description = "REST API to create account in Omega Bank")

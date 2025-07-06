@@ -10,7 +10,7 @@ public interface Account_Service_Interface {
 	Account createModifyAccountDetails(AccountDto account, int modifyFlag);
 	void deleteAccount(Account account);
 	List<AccountDto> findAllAccounts();
-	List<AccountDto> getAccountByCustomerId(int customerId);
+	List<AccountDto> getAccountByCustomerId(String customerId);
 	Account createAccountPendingAuth(AccountDto accountdDto);
 
 }

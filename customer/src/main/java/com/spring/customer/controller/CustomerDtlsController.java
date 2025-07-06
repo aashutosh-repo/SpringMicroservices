@@ -94,6 +94,12 @@ public class CustomerDtlsController {
         return  ResponseEntity.ok(customerDtoList);
     }
 
+    @GetMapping("/customerById")
+    public ResponseEntity<CustomerDto> getTheCustomerDetailsPayments(@RequestParam String customerId, @RequestParam String customerType){
+        ResponseWrapperDto customerDtoList = customerDetailsServices.searchSingleCustomerData(customerId,customerType);
+        return  ResponseEntity.ok(customerDtoList.getCustomerDetails());
+    }
+
 
     @PostMapping("/customerSearchbydate")
     public ResponseEntity<List<ResponseWrapperDto>> getCustomerDetailsBydate(@RequestParam  CustomerSearchRequestDTO requestDTO){

@@ -1,4 +1,4 @@
-package com.bancs.account.dto;
+package com.bancs.payments.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
