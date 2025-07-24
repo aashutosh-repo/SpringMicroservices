@@ -4,6 +4,7 @@ import com.spring.core.entity.TokenVault;
 import com.spring.core.repository.TokenizationRepository;
 import com.spring.core.services.si.TokenInterface;
 import com.spring.core.utils.EncryptionUtil;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,15 +13,15 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
+@AllArgsConstructor
 public class TokenizationService implements TokenInterface {
 
-    @Autowired
-    private TokenizationRepository repository;
+    private  final TokenizationRepository repository;
 
     @Override
     public String tokenizeCard(String cardNumber) {
         SecretKey secretKey = EncryptionUtil.generateKey();
-        String encryptedData = EncryptionUtil.encrypt(cardNumber,secretKey);
+        String encryptedData = EncryptionUtil.encrypt(cardNumber);
         String token = UUID.randomUUID().toString().replace("-", "");
 
         TokenVault tokenVault = new TokenVault();
@@ -37,6 +38,6 @@ public class TokenizationService implements TokenInterface {
     public String detokenize(String token) {
         TokenVault tokenVault = repository.findByToken(token)
                 .orElseThrow(() -> new RuntimeException("Token not found"));
-        return EncryptionUtil.decrypt(tokenVault.getEncryptedCardData(),tokenVault.getSecureKey());
+        return EncryptionUtil.decrypt(tokenVault.getEncryptedCardData());
     }
 }
