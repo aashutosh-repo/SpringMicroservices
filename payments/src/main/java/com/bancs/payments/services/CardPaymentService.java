@@ -5,7 +5,10 @@ import com.bancs.payments.dto.CardNetworkResponse;
 import com.bancs.payments.dto.CardPaymentResponse;
 import com.bancs.payments.dto.PaymentRequestDTO;
 import com.bancs.payments.entity.CardDetails;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CardPaymentService {
@@ -20,6 +24,7 @@ public class CardPaymentService {
     private final EncryptionUtil tokenService;
     private final CardNetworkClient cardNetworkClient;
     private final LedgerService ledgerService;
+    private final CoreServiceClient coreServiceClient;
 //    private final ValidationService validationService;
     private static final String PAYLOAD= "payload";
 
@@ -28,20 +33,23 @@ public class CardPaymentService {
         String payload = request.getToken();
 
         if (payload == null || payload.isEmpty()) {
-//            return ResponseEntity.badRequest().body("Missing encrypted payload");
             return new CardPaymentResponse("FAILED", "card Details not Found");
         }
         // Step 1: Decrypt/Tokenize
-        SecretKey secretKey = EncryptionUtil.getStaticKey();
-        String decryptedData = EncryptionUtil.decrypt(payload, secretKey);
+        String decryptedData = coreServiceClient.callDecryptService(payload);
 
-//        CardDetails card = tokenService.decryptToken(request.getToken());
-
-        // Step 2: Validate Inputs will be implemented later
+        // Step 2: Inputs Validation will be implemented later
 //        validationService.validate(card, request.getAmount(), request.getCurrency());
 
         // Step 3: Authorize with Card Network (e.g., VISA)
         CardDetails card = new CardDetails();
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        try {
+             card = objectMapper.readValue(decryptedData, CardDetails.class);
+        }catch (JsonProcessingException e){
+            e.printStackTrace();
+        }
         CardNetworkResponse networkResponse = cardNetworkClient.authorizeTransaction(card, request);
 
         if (networkResponse.isApproved()) {

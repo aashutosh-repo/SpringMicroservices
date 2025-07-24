@@ -2,6 +2,7 @@ package com.bancs.payments.services;
 
 import com.bancs.payments.error.CustomErrorMessage;
 import com.bancs.payments.error.ErrorCode;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -14,6 +15,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
 
+@Component
 public class EncryptionUtil {
 
     private EncryptionUtil(){}
@@ -74,7 +76,7 @@ public class EncryptionUtil {
     }
 
     //this method to decrypt the network data
-    public static String decrypt(String encryptedData, SecretKey secretKey) {
+    public static String decrypt(String encryptedData) {
         try {
             byte[] encryptedWithIV = Base64.getDecoder().decode(encryptedData);
 
@@ -88,7 +90,7 @@ public class EncryptionUtil {
 
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             GCMParameterSpec parameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
-            cipher.init(Cipher.DECRYPT_MODE, secretKey, parameterSpec);
+            cipher.init(Cipher.DECRYPT_MODE, getStaticKey(), parameterSpec);
 
             byte[] decryptedData = cipher.doFinal(encryptedBytes);
             return new String(decryptedData);
