@@ -1,12 +1,11 @@
 package com.spring.core.utils;
-
 import com.spring.core.error.CustomErrorMessage;
 import com.spring.core.error.ErrorCode;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.*;
-
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
@@ -19,8 +18,7 @@ import java.util.Base64;
 public class EncryptionUtil {
 
     private EncryptionUtil(){}
-    @Value("${spring.secure.key}")
-    private static String secretKey;
+
     private static final String ALGORITHM = "AES/GCM/NoPadding";
 
     // AES Key Size (256 bits)
@@ -42,10 +40,12 @@ public class EncryptionUtil {
             throw new RuntimeException("Unexpected error while generating AES key", e);
         }
     }
-    public static SecretKey getSecretKeyFromString(String keyString) {
-        byte[] keyBytes = keyString.getBytes(StandardCharsets.UTF_8);
-        return new SecretKeySpec(keyBytes, "AES");
+    //FOR DECRYPTION
+    public static SecretKey getStaticKey() {
+        String secret = "mySuperSecretKey1234567890123456"; // must be 32 chars for 256-bit key
+        return new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "AES");
     }
+
     private static byte[] generateIV() {
         byte[] iv = new byte[GCM_IV_LENGTH];
         new SecureRandom().nextBytes(iv);
@@ -53,13 +53,13 @@ public class EncryptionUtil {
     }
 
     //this method to encrypt the network data
-    public static String encrypt(String data, SecretKey secretKey) {
+    public static String encrypt(String data) {
         try {
             byte[] iv = generateIV();
             Cipher cipher = Cipher.getInstance(ALGORITHM);
 
             GCMParameterSpec parameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey, parameterSpec);
+            cipher.init(Cipher.ENCRYPT_MODE, getStaticKey(), parameterSpec);
 
             byte[] encryptedData = cipher.doFinal(data.getBytes());
 
@@ -75,7 +75,7 @@ public class EncryptionUtil {
     }
 
     //this method to decrypt the network data
-    public static String decrypt(String encryptedData, SecretKey secretKey) {
+    public static String decrypt(String encryptedData) {
         try {
             byte[] encryptedWithIV = Base64.getDecoder().decode(encryptedData);
 
@@ -89,19 +89,19 @@ public class EncryptionUtil {
 
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             GCMParameterSpec parameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
-            cipher.init(Cipher.DECRYPT_MODE, secretKey, parameterSpec);
+            cipher.init(Cipher.DECRYPT_MODE, getStaticKey(), parameterSpec);
 
             byte[] decryptedData = cipher.doFinal(encryptedBytes);
             return new String(decryptedData);
         }catch (IllegalArgumentException e) {
-        // Handle specific known issues
-        throw new RuntimeException(ErrorCode.DECRYPTION_FAILED);
-    } catch (GeneralSecurityException e) {
-        // Handle other security-related issues
-        throw new CustomErrorMessage(ErrorCode.DECRYPTION_FAILED , "Decryption failed due to security error " +e);
-    } catch (Exception e) {
-        // Catch all unexpected errors
-        throw new CustomErrorMessage(ErrorCode.DECRYPTION_FAILED ,  "An unknown error occurred during decryption" +e);
-    }
+            // Handle specific known issues
+            throw new RuntimeException(ErrorCode.DECRYPTION_FAILED);
+        } catch (GeneralSecurityException e) {
+            // Handle other security-related issues
+            throw new CustomErrorMessage(ErrorCode.DECRYPTION_FAILED , "Decryption failed due to security error " +e);
+        } catch (Exception e) {
+            // Catch all unexpected errors
+            throw new CustomErrorMessage(ErrorCode.DECRYPTION_FAILED ,  "An unknown error occurred during decryption" +e);
+        }
     }
 }

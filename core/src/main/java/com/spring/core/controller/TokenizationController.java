@@ -3,11 +3,8 @@ package com.spring.core.controller;
 import com.spring.core.services.DataSecurityService;
 import com.spring.core.services.TokenizationService;
 import com.spring.core.utils.CardMaskUtil;
-import com.spring.core.utils.EncryptionUtil;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.TypeCollector;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,21 +14,20 @@ import java.util.Map;
 @RestController
 @RequestMapping("/core")
 @RequiredArgsConstructor
+@AllArgsConstructor
 public class TokenizationController {
 
     private static final String PAYLOAD= "payload";
-    @Autowired
-    private TokenizationService tokenizationService;
-    @Autowired
-    private DataSecurityService securityService;
+    private final TokenizationService tokenizationService;
+    private final DataSecurityService securityService;
 
     @PostMapping("/secureCard/tokenize")
-    public String tokenizeCard(@RequestParam String cardNumber) throws Exception {
+    public String tokenizeCard(@RequestParam String cardNumber) {
         return tokenizationService.tokenizeCard(cardNumber);
     }
 
     @GetMapping("/secureCard/detokenize")
-    public String detokenize(@RequestParam String token) throws Exception {
+    public String detokenize(@RequestParam String token) {
         return tokenizationService.detokenize(token);
     }
 

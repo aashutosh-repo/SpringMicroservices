@@ -38,7 +38,7 @@ public class PaymentController {
             SecretKey secretKey = EncryptionUtil.getStaticKey();
             log.info("Decryption in progress...");
             String decrpt = coreServiceClient.callDecryptService(encryptedPayload);
-            String decryptedData = EncryptionUtil.decrypt(encryptedPayload, secretKey);
+            String decryptedData = EncryptionUtil.decrypt(encryptedPayload);
               log.info("Decryption completed...");
             log.info("The Decrypted data : {}",decrpt);
             log.info("The Decrypted data : {}",decryptedData);
@@ -60,7 +60,7 @@ public class PaymentController {
                 return ResponseEntity.badRequest().body(Map.of(PAYLOAD,"Missing encrypted payload"));
             }
             SecretKey secretKey = EncryptionUtil.getStaticKey();
-            String decryptedData = EncryptionUtil.decrypt(encryptedPayload, secretKey);
+            String decryptedData = EncryptionUtil.decrypt(encryptedPayload);
             // Further parse the decrypted data and process the payment logic
             String resMessage = "Transaction Successful";
             String encryptData = EncryptionUtil.encrypt(resMessage,secretKey);
