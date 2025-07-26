@@ -3,7 +3,6 @@ package com.spring.security.services;
 import com.spring.security.configuration.JwtUtil;
 import com.spring.security.entity.UserEntity;
 import com.spring.security.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -13,7 +12,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class AuthService {
@@ -55,6 +53,6 @@ public class AuthService {
                 .map(grantedAuthority -> grantedAuthority.getAuthority().replace("ROLE_", ""))
                 .toList();
 
-         return jwtUtil.generateToken(userDetails.getUsername(), roles);
+          return jwtUtil.generateToken(userDetails.getUsername(), roles);
     }
 }
