@@ -19,10 +19,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Component
-@RequiredArgsConstructor
 public class JwtAuthFilter implements GlobalFilter, Ordered {
     private final JwtUtil jwtUtil;
 
+    public JwtAuthFilter(JwtUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
