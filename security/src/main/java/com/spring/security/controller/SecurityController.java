@@ -6,15 +6,18 @@ import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.spring.security.configuration.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Base64;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/.well-known")
+@RequestMapping("/auth/security/.well-known")
 @RequiredArgsConstructor
 public class SecurityController {
 
@@ -31,5 +34,16 @@ public class SecurityController {
                 .keyID("my-key-id")
                 .build();
         return new JWKSet(rsaKey).toJSONObject();
+    }
+    @GetMapping("/public-key")
+    public ResponseEntity<String> getPublicKey() {
+        PublicKey publicKey = jwtUtil.getPublicKey();
+        String encoded = Base64.getEncoder().encodeToString(publicKey.getEncoded());
+
+        String pem = "-----BEGIN PUBLIC KEY-----\n" +
+                encoded.replaceAll("(.{64})", "$1\n") +
+                "\n-----END PUBLIC KEY-----";
+
+        return ResponseEntity.ok(pem);
     }
 }

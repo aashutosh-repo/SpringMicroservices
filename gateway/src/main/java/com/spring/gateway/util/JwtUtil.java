@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class JwtUtil {
 
-    private static final String SECRET_KEY =  "aashutoshkumar123456789"; //need to secure with properties file
+    private static final String SECRET_KEY =  "4Ldrf8R1wK6m9Xb2Tz7qYvGp3Nh5UfJc"; //need to secure with properties file
 
     public Claims extractClaims(String token){
         return Jwts.parserBuilder()
