@@ -129,7 +129,7 @@ API gateway for unified routing and access.
 - Spring Cloud Gateway
 - Routes external URIs to backend services
 - CORS support for Angular frontend
-- Security (optional): OAuth2, JWT (config in comments)
+- Oauth2 Security enabled at Gateway: Now enforces authentication/authorization using OAuth2, JWT, or other configured methods
 
 ---
 
@@ -207,6 +207,7 @@ API gateway for unified routing and access.
 - 🪪 **Tokenization**: Secures sensitive card/token data
 - 🔐 **Authentication** (optional): JWT-based login, OAuth2, basic auth
 - 🌐 **CORS**: Pre-configured for Angular/React frontend access
+- 🚪 **Gateway Security**: All requests are now protected at the API Gateway. Only authenticated/authorized traffic reaches backend services.
 
 ---
 
