@@ -3,7 +3,6 @@ package com.spring.core.controller;
 import com.spring.core.services.DataSecurityService;
 import com.spring.core.services.TokenizationService;
 import com.spring.core.utils.CardMaskUtil;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +13,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/core")
 @RequiredArgsConstructor
-@AllArgsConstructor
 public class TokenizationController {
 
     private static final String PAYLOAD= "payload";
