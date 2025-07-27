@@ -2,19 +2,17 @@ package com.spring.gateway.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 public class JwtUtil {
-
     private static final String SECRET_KEY =  "4Ldrf8R1wK6m9Xb2Tz7qYvGp3Nh5UfJc"; //need to secure with properties file
 
-    public Claims extractClaims(String token){
+    public Claims extractClaims(String token) throws Exception {
         return Jwts.parserBuilder()
-                .setSigningKey(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
+                .setSigningKey(KeyLoader.loadPublicKey("keys/public_key.pem"))
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
@@ -29,7 +27,7 @@ public class JwtUtil {
         }
     }
 
-    public String getUserName(String token){
+    public String getUserName(String token) throws Exception {
         return  extractClaims(token).getSubject();
     }
 }

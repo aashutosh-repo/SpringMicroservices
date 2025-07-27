@@ -3,7 +3,6 @@ package com.spring.gateway.config;
 
 import com.spring.gateway.util.JwtUtil;
 import io.jsonwebtoken.Claims;
-import lombok.RequiredArgsConstructor;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -44,7 +43,12 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             return unauthorized(exchange, "Invalid or expired token");
         }
 
-        Claims claims = jwtUtil.extractClaims(token);
+        Claims claims = null;
+        try {
+            claims = jwtUtil.extractClaims(token);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         ServerHttpRequest modifiedRequest = exchange.getRequest()
                 .mutate()
                 .header("X-Username", claims.getSubject())
