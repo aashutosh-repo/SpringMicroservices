@@ -13,4 +13,5 @@ public class UserResponseDTO {
     private String firstName;
     private String lastName;
     private LocalDateTime lastLogin;
+    private LocalDateTime expiryTime;
 }

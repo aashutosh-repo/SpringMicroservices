@@ -1,9 +1,13 @@
 package com.spring.security.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 @Entity
 @Table(name = "roles")
+@Data
+@RequiredArgsConstructor
 public class RoleEntity {
 
     @Id
@@ -12,20 +16,4 @@ public class RoleEntity {
 
     @Column(unique = true, nullable = false)
     private String roleName;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getRoleName() {
-        return roleName;
-    }
-
-    public void setRoleName(String roleName) {
-        this.roleName = roleName;
-    }
 }

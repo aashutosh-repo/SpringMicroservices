@@ -9,7 +9,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -34,11 +33,7 @@ public class ApiController {
 
     @PostMapping("/login")
     public ResponseEntity<UserResponseDTO> login(@RequestBody UserRequestDTO request) {
-        String token = authService.authenticate(request.getUsername(), request.getPassword());
-        UserResponseDTO responseDTO =new UserResponseDTO();
-        responseDTO.setToken(token);
-        responseDTO.setLastLogin(LocalDateTime.now());
-        responseDTO.setUserName(request.getUsername());
-        return ResponseEntity.ok(responseDTO);
+        UserResponseDTO response = authService.authenticate(request.getUsername(), request.getPassword());
+        return ResponseEntity.ok(response);
     }
 }
