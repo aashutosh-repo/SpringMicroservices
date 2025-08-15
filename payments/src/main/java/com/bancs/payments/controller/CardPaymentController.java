@@ -1,7 +1,7 @@
 package com.bancs.payments.controller;
 
 
-import com.bancs.payments.dto.CardPaymentResponse;
+import com.bancs.payments.dto.PaymentResponse;
 import com.bancs.payments.dto.PaymentRequestDTO;
 import com.bancs.payments.services.CardPaymentService;
 import com.bancs.payments.services.CoreServiceClient;
@@ -21,7 +21,7 @@ public class CardPaymentController {
 
     @PostMapping("/payment")
     public ResponseEntity<Map<String,String>> processPayment(@RequestBody PaymentRequestDTO requestDTO){
-        CardPaymentResponse response = cardpaymentService.handleCardTransaction(requestDTO);
+        PaymentResponse response = cardpaymentService.handleCardTransaction(requestDTO);
         String payload = response.toString();
         return ResponseEntity.ok(Map.of("payload",payload));
     }

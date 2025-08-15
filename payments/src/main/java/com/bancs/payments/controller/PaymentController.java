@@ -1,10 +1,10 @@
 package com.bancs.payments.controller;
 
-import com.bancs.payments.dto.PaymentSummary;
-import com.bancs.payments.dto.TransactionDTO;
+import com.bancs.payments.dto.*;
 import com.bancs.payments.services.CoreServiceClient;
 import com.bancs.payments.services.EncryptionUtil;
 import com.bancs.payments.services.PaymentService;
+import com.bancs.payments.utility.PaymentRequest;
 import lombok.AllArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -76,13 +76,24 @@ public class PaymentController {
         return ResponseEntity.ok(transactionDTOList);
     }
 
-    @GetMapping("/initiate")
-    public Mono<PaymentSummary> initiatePayment(
-            @RequestParam String customerId,
-            @RequestParam String accountId
-    ) {
-        return paymentService.initiatePayment(customerId, accountId);
+    @PostMapping("/initiate")
+    public ResponseEntity<PaymentResponse> initiatePayment(@RequestBody PaymentRequest request) {
+        return switch (request.getPaymentMethod()) {
+            case "UPI" -> {
+                UpiPaymentRequest upiPaymentRequest = (UpiPaymentRequest) request;
+                yield ResponseEntity.ok(new PaymentResponse("201", " UPI Success"));
+                //upi payment Logic here
+            }
+            case "CARD" -> {
+                CardPaymentRequest cardPaymentRequest = (CardPaymentRequest) request;
+                yield ResponseEntity.ok(new PaymentResponse("201", " CARD Success"));
+                //Handle CARD payment Request
+            }
+            case "NET_BANKING" -> {
+                NetBankingPaymentRequest netBankingPaymentRequest = (NetBankingPaymentRequest) request;
+                yield ResponseEntity.ok(new PaymentResponse("201", "Net Banking Success"));
+            }
+            default -> ResponseEntity.ok(new PaymentResponse("201", "Success"));
+        };
     }
-
-
 }

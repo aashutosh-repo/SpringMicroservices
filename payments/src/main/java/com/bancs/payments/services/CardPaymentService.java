@@ -2,19 +2,14 @@ package com.bancs.payments.services;
 
 import com.bancs.payments.data.CardNetworkClient;
 import com.bancs.payments.dto.CardNetworkResponse;
-import com.bancs.payments.dto.CardPaymentResponse;
+import com.bancs.payments.dto.PaymentResponse;
 import com.bancs.payments.dto.PaymentRequestDTO;
 import com.bancs.payments.entity.CardDetails;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-import javax.crypto.SecretKey;
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -29,11 +24,11 @@ public class CardPaymentService {
     private static final String PAYLOAD= "payload";
 
 
-    public CardPaymentResponse handleCardTransaction(PaymentRequestDTO request) {
+    public PaymentResponse handleCardTransaction(PaymentRequestDTO request) {
         String payload = request.getToken();
 
         if (payload == null || payload.isEmpty()) {
-            return new CardPaymentResponse("FAILED", "card Details not Found");
+            return new PaymentResponse("FAILED", "card Details not Found");
         }
         // Step 1: Decrypt/Tokenize
         String decryptedData = coreServiceClient.callDecryptService(payload);
@@ -56,9 +51,9 @@ public class CardPaymentService {
             // Step 4: Save to Ledger
             ledgerService.recordTransaction(request, networkResponse);
 
-            return new CardPaymentResponse("SUCCESS", networkResponse.getAuthCode());
+            return new PaymentResponse("SUCCESS", networkResponse.getAuthCode());
         } else {
-            return new CardPaymentResponse("DECLINED", networkResponse.getDeclineReason());
+            return new PaymentResponse("DECLINED", networkResponse.getDeclineReason());
         }
     }
 }
