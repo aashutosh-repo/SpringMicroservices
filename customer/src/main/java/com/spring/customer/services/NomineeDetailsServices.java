@@ -10,7 +10,7 @@ import com.spring.customer.mapper.NomineeMapper;
 import com.spring.customer.repository.Nominee_Repository;
 import com.spring.customer.services.si.NomineeServiceInterface;
 import com.spring.customer.utils.SequenceGenerator;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -19,10 +19,9 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class NomineeDetailsServices implements NomineeServiceInterface {
 	private static final Logger log = LogManager.getLogger(NomineeDetailsServices.class);
 

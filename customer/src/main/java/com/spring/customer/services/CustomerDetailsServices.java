@@ -31,7 +31,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -54,6 +53,7 @@ public class CustomerDetailsServices implements CustomerServiceInterface {
 
 
 	@Override
+	@Transactional
 	@CacheEvict(value = "allCustomersCache", key = "'allCustomers'", allEntries = false)
 	public void CreateCustomerDetails(CustomerDto inp_cust_details,
 									  CustomerAddressDto addressDetailsDto,
@@ -77,23 +77,23 @@ public class CustomerDetailsServices implements CustomerServiceInterface {
 		}
 		customer_Details.setCustomerId(customerKeyKey);
 		customer_Details.setCustCreationDt(LocalDate.now());
-		customer_Details= detailsRepository.saveAndFlush(customer_Details);
+		customer_Details= detailsRepository.save(customer_Details);
 
 		addressServices.createModifyCustAddressDetails(addressDetailsDto,customer_Details);
 		//Documents Details Creation
 		doc.setCustomer(customer_Details);
-		docRepository.saveAndFlush(doc);
+		documentsServices.saveDocumentDetails(doc);
 		//create Nominee details
 		nomineeService.createNomineesDetails(nomineeDtoList,customer_Details,1);
 	}
 
 	@Cacheable(value = "allCustomersCache", key = "'allCustomers'")
 	@Override
-	public List<CustomerDto> getAllCust(){
-		List<CustomerDetails> allcust = detailsRepository.findAll();
-		return allcust.stream()
+	public List<CustomerDto> getCustomerList(){
+		List<CustomerDetails> customerDetailsList = detailsRepository.findAll();
+		return customerDetailsList.stream()
 				.map(c -> CustomerDetailsMapper.mapToCustomerDetailsDto(c, new CustomerDto()))
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 	@Override

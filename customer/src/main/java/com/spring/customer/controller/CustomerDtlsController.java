@@ -32,7 +32,7 @@ public class CustomerDtlsController {
     description = "REST API to All Customer in Omega Bank")
     @GetMapping("/getAllCustomerDetails")
     public List<CustomerDto> getAllCustomer(){
-        return customerDetailsServices.getAllCust();
+        return customerDetailsServices.getCustomerList();
     }
 
 

@@ -14,7 +14,7 @@ public interface CustomerServiceInterface {
 									  List<NomineeDto> nomineeDtoList);
 	CustomerDto findCustomerByMobileNumber(String mobile);
 	CustomerDto modifyCustomer(CustomerDto customerInp, String customerId,int customerType);
-	List<CustomerDto> getAllCust();
+	List<CustomerDto> getCustomerList();
 
     List<ResponseWrapperDto> searchCustomers(CustomerSearchRequestDTO requestDTO);
 }

@@ -9,7 +9,7 @@ public class DocumentDetailsMapper {
 	}
 
 	public static DocumentsDtlsDto mapToDocumentDetailsDto(DocumentsDetails documentDetails, DocumentsDtlsDto documentDetailsDto) {
-//	        documentDetailsDto.setCustId(documentDetails.getCustId());
+	        documentDetailsDto.setCustId(documentDetails.getCustomer().getCustomerId().getCustomerId());
 	        documentDetailsDto.setDocDescription(documentDetails.getDocDescription());
 	        documentDetailsDto.setDocIdentificationNumber(documentDetails.getDocIdentificationNumber());
 	        documentDetailsDto.setDocType(documentDetails.getDocType());

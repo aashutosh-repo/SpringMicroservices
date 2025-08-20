@@ -12,7 +12,7 @@ public class DocumentsDtlsDto {
 
     @NotNull(message = "Customer ID cannot be null")
     @Schema(description = "Unique identifier for the customer", example = "1001")
-    protected int custId;
+    protected String custId;
 
     @NotEmpty(message = "Document description cannot be null or empty")
     @Schema(description = "Description of the document", example = "Passport")
