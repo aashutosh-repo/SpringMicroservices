@@ -3,17 +3,24 @@ package com.spring.customer;
 import com.spring.customer.customer.CustomerDetails;
 import com.spring.customer.customer.CustomerKey;
 import com.spring.customer.dto.*;
+import com.spring.customer.error.ResourceNotFoundException;
 import com.spring.customer.mapper.CustomerDetailsMapper;
 import com.spring.customer.repository.Customer_Details_Repository;
 import com.spring.customer.services.*;
+import com.spring.customer.utils.SequenceGenerator;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.math.BigInteger;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -26,6 +33,14 @@ class CustomerServiceTest {
     @Mock private CustomerAddressServices addressServices;
     @Mock private DocumentsServices documentsServices;
     @Mock private NomineeDetailsServices nomineeService;
+    @Mock private SequenceGenerator sequenceGenerator;
+
+    private CustomerDto customerDto;
+    private CustomerAddressDto addressDto;
+    private DocumentsDtlsDto documentsDto;
+    List<NomineeDto> nomineeDtos;
+    private CustomerKey key;
+    private CustomerDetails customerEntity;
 
     @InjectMocks private CustomerDetailsServices service;
 
@@ -49,7 +64,64 @@ class CustomerServiceTest {
         return ((root, query, criteriaBuilder) -> criteriaBuilder.conjunction());
     }
 
+    @BeforeEach
+    void setup() {
+        customerDto = new CustomerDto();
+        customerDto.setCustomerType("2");   // example type
+
+        addressDto = new CustomerAddressDto();
+        documentsDto = new DocumentsDtlsDto();
+        nomineeDtos= new ArrayList<>();
+
+        key = new CustomerKey("C123", 1);
+        customerEntity = new CustomerDetails();
+        customerEntity.setCustomerId(key);
+        customerEntity.setFirstName("John");
+        customerEntity.setLastName("Doe");
+    }
+
     // ---------- Tests ----------
+    //---- Creation -----
+    @Test
+    void testCreateCustomerDetails_Success(){
+        //Step1: arrange
+        BigInteger generatedId = BigInteger.valueOf(123);
+        when(sequenceGenerator.generateSequence("CustomerID_seq")).thenReturn(generatedId);
+        CustomerDetails details = new CustomerDetails();
+        details.setCustomerId(new CustomerKey("CUST000123",2));
+        when(detailsRepository.save(any(CustomerDetails.class))).thenReturn(details);
+
+        //Step2: act
+
+        service.CreateCustomerDetails(customerDto,addressDto,documentsDto, nomineeDtos);
+
+        //step3: Assert
+        verify(sequenceGenerator,times(1)).generateSequence("CustomerID_seq");
+        verify(detailsRepository, times(1)).save(any(CustomerDetails.class));
+        verify(addressServices, times(1)).createModifyCustAddressDetails(eq(addressDto), any(CustomerDetails.class));
+        verify(nomineeService, times(1)).createNomineesDetails(eq(Collections.emptyList()), any(CustomerDetails.class), eq(1));
+    }
+
+    @Test
+    void testCreateCustomerDetails_DefaultCustomerTypeWhenNull() {
+        // Arrange
+        customerDto.setCustomerType(null); // force null to test default
+        when(sequenceGenerator.generateSequence("CustomerID_seq")).thenReturn(BigInteger.ONE);
+        when(detailsRepository.save(any(CustomerDetails.class))).thenAnswer(i -> i.getArgument(0));
+
+        // Act
+        service.CreateCustomerDetails(
+                customerDto,
+                addressDto,
+                documentsDto,
+                Collections.emptyList()
+        );
+
+        // Assert
+        verify(detailsRepository).save(argThat(customer ->
+                customer.getCustomerId().getCustomerType() == 1   // default applied
+        ));
+    }
 
     @Test
     void searchCustomers_whenAllFiltersProvided_returnsMappedResponseAndAppliesAllSpecs() {
@@ -62,8 +134,6 @@ class CustomerServiceTest {
 
         CustomerDetails entity = customer1();
 
-        CustomerAddressDto addressDto = new CustomerAddressDto();
-        DocumentsDtlsDto documentsDto = new DocumentsDtlsDto();
         NomineeDto nominee = new NomineeDto();
         List<NomineeDto> nominees = List.of(nominee);
         CustomerDto mappedDto = new CustomerDto();
@@ -94,7 +164,7 @@ class CustomerServiceTest {
             List<ResponseWrapperDto> out = service.searchCustomers(req);
 
             assertEquals(1, out.size());
-            ResponseWrapperDto wrapper = out.get(0);
+            ResponseWrapperDto wrapper = out.getFirst();
             assertSame(mappedDto, wrapper.getCustomerDetails());
             assertSame(addressDto, wrapper.getAddressDetails());
             assertSame(documentsDto, wrapper.getDocumentDetails());
@@ -226,5 +296,82 @@ class CustomerServiceTest {
             verify(nomineeService).findNomineeByCustomerId(e1.getCustomerId());
             verify(nomineeService).findNomineeByCustomerId(e2.getCustomerId());
         }
+    }
+
+    @Test
+    void testSearchSingleCustomerData_Found() {
+        // Arrange
+        when(detailsRepository.findById(key)).thenReturn(Optional.of(customerEntity));
+
+        when(addressServices.findAddressByCustomerID("C123", 1)).thenReturn(addressDto);
+
+        when(documentsServices.getDocumentsByCustomerId(key)).thenReturn(documentsDto);
+
+        NomineeDto nominee = new NomineeDto();
+        when(nomineeService.findNomineeByCustomerId(key)).thenReturn(List.of(nominee));
+
+        // Act
+        ResponseWrapperDto response = service.searchSingleCustomerData("C123", "1");
+
+        // Assert
+        assertNotNull(response);
+        assertNotNull(response.getCustomerDetails());
+        assertEquals("John", response.getCustomerDetails().getFirstName());
+        assertEquals(addressDto, response.getAddressDetails());
+        assertEquals(documentsDto, response.getDocumentDetails());
+        assertEquals(1, response.getNomineeDetails().size());
+
+        verify(detailsRepository).findById(key);
+        verify(addressServices).findAddressByCustomerID("C123", 1);
+        verify(documentsServices).getDocumentsByCustomerId(key);
+        verify(nomineeService).findNomineeByCustomerId(key);
+    }
+
+    @Test
+    void testSearchSingleCustomerData_NotFound() {
+        // Arrange
+        when(detailsRepository.findById(key)).thenReturn(Optional.empty());
+
+        // Act
+        ResponseWrapperDto response = service.searchSingleCustomerData("C123", "1");
+
+        // Assert
+        assertNotNull(response);
+        assertNull(response.getCustomerDetails()); // no customer
+        assertNull(response.getAddressDetails());
+        assertNull(response.getDocumentDetails());
+        assertNull(response.getNomineeDetails());
+
+        verify(detailsRepository).findById(key);
+        verifyNoInteractions(addressServices, documentsServices, nomineeService);
+    }
+
+    @Test
+    void testFindCustomerByMobileNumber_Found() {
+        // Arrange
+        when(detailsRepository.findByMobileNumber("9999999999"))
+                .thenReturn(Optional.of(customerEntity));
+
+        // Act
+        CustomerDto dto = service.findCustomerByMobileNumber("9999999999");
+
+        // Assert
+        assertNotNull(dto);
+        assertEquals("John", dto.getFirstName());
+        verify(detailsRepository).findByMobileNumber("9999999999");
+    }
+
+    @Test
+    void testFindCustomerByMobileNumber_NotFound() {
+        // Arrange
+        when(detailsRepository.findByMobileNumber("8888888888"))
+                .thenReturn(Optional.empty());
+
+        // Act + Assert
+        ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class,
+                () -> service.findCustomerByMobileNumber("8888888888"));
+
+        assertTrue(ex.getMessage().contains("Customer MobileNumber :8888888888"));
+        verify(detailsRepository).findByMobileNumber("8888888888");
     }
 }
