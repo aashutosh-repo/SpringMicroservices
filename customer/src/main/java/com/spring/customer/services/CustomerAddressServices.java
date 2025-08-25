@@ -1,7 +1,6 @@
 package com.spring.customer.services;
 
 
-import com.spring.customer.customer.AddressID;
 import com.spring.customer.customer.CustomerAddressDetails;
 import com.spring.customer.customer.CustomerDetails;
 import com.spring.customer.customer.CustomerKey;
@@ -42,8 +41,8 @@ public class CustomerAddressServices implements AddressServiceInterface {
         }
 	}
     	
-    public Optional<CustomerAddressDetails> findCustAddressByID(AddressID addressID) {
-        return customerAddressRepository.findById((long) addressID.getAddressId());
+    public Optional<CustomerAddressDetails> findCustAddressByID(Long addressID) {
+        return customerAddressRepository.findById(addressID);
     }
 
     public boolean deleteAddress(CustomerAddressDetails customer_Address_Details) {
@@ -55,6 +54,4 @@ public class CustomerAddressServices implements AddressServiceInterface {
         Optional<CustomerAddressDetails> addressDetails = customerAddressRepository.findByCustomer_CustomerId_CustomerIdAndCustomer_CustomerId_CustomerType(customerId,customerType);
         return addressDetails.map(customerAddressDetails -> AddressMapper.mapToCustomerAddressDto(customerAddressDetails, new CustomerAddressDto())).orElseGet(CustomerAddressDto::new);
     }
-
-
 }
