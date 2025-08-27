@@ -40,4 +40,7 @@ public class AccountsConstants {
     public static final int MODIFY_ONHOLD = 2;
     public static final int ACTIVE = 3;
 
+    public static final String INT_ACCOUNT_NUMBER_PREFIX = "OMEGA";
+  public static final String CUST_ACCOUNT_NUMBER_PREFIX = "OMEGA";
+
 }

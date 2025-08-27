@@ -10,6 +10,7 @@ import com.bancs.account.error.ErrorCode;
 import com.bancs.account.mapper.AccountMapper;
 import com.bancs.account.repository.Account_repository;
 import com.bancs.account.services.si.Account_Service_Interface;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,13 +19,12 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.math.BigInteger;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -36,27 +36,29 @@ public class Account_services implements Account_Service_Interface {
 	private final SequenceGenerator sequenceGenerator;
     private final TempModifiedEntityServices tempModifiedEntityService;
 	private final WebClient webClient;
+	private static final String CUSTOMER_API_PATH = "/customer/getCustomerByMobileNumber";
 
 
 	@Override
+	@Transactional
 	public Account createAccountPendingAuth(AccountDto accountDto) {
 		Account account = AccountMapper.mapToAccount(accountDto, new Account());
 		CustomerDto customer = webClient.get()
 				.uri(uriBuilder -> uriBuilder
-						.path("/customer/getCustomerByMobileNumber") // API path
+						.path(CUSTOMER_API_PATH) // API path
 						.queryParam("mobileNumber", "9876543210")  // Pass mobileNumber as query param
 						.build()
 				)
 				.retrieve()
 				.bodyToMono(CustomerDto.class)
-				.block();
-		BigInteger entityId = sequenceGenerator.generateSequence("AccountId_seq");
-		BigInteger intAccNumber = sequenceGenerator.generateSequence("InternalAccNO_seq");
-		BigInteger customerAccNumber = sequenceGenerator.generateSequence("CustomerAccNO_seq");
-		String intAccNumStr = "OMEGA"+intAccNumber.toString();
-		String customerAccountNum = "SB"+ customerAccNumber.toString();
-		AccountPk accId = new AccountPk();
-		accId.setAccount_id(entityId.intValue());
+				.timeout(Duration.ofSeconds(5))
+				.blockOptional()
+				.orElseThrow(() -> new CustomErrorMessage(ErrorCode.CUSTOMER_NOT_FOUND));
+		String intAccNumStr = this.generateInternalAccountNumber();
+		String customerAccountNum = this.generateCustomerAccountNumber();
+		AccountPk accId ;
+		accId = this.generateAccountPrimaryKey();
+		accId.setAccount_id(accId.getAccount_id());
 		account.setOwner_name(customer.getFirstName() +" " +customer.getLastName());
 		account.setAccount_status(AccountsConstants.PENDING_AUTH);
 		account.setClsr_dt(null);
@@ -73,7 +75,9 @@ public class Account_services implements Account_Service_Interface {
 				account
 	        );
 		if(isStored) {
-			logger.info("Data Stored Successfully into TempModifiedEntityServices");
+			logger.info("Account created successfully: accountNumber={}, ownerName={}", account.getAccountNumber(), account.getOwner_name());
+		}else {
+			throw new CustomErrorMessage("Failed to store data in TempModifiedEntity");
 		}
 		
 		return account;
@@ -92,7 +96,8 @@ public class Account_services implements Account_Service_Interface {
 	}
 
 	@Override
-	@CachePut(value = "accounts", key = "#account.account_number")
+	@Transactional
+	@CachePut(value = "accounts", key = "#account.accountNumber")
 	public Account createModifyAccountDetails(AccountDto account, int modifyFlag){
         logger.info("Entered int Creation Task of class : {}On : {}", this.getClass().getSimpleName(), LocalDate.now());
 		//If Modify flag is 1 then primary key should pass as a User-input
@@ -111,20 +116,9 @@ public class Account_services implements Account_Service_Interface {
         }
 		else
 		{
-//			CustomerID cId = new CustomerID();
-//			cId.setCustomerID(account.getCust_id());
-//			cId.setCustomerType(account.getCus_type());
-//
-//			Optional<CustomerDetails> customer = custRepository.findById(cId);
-//			if(customer.isEmpty()) {
-//				throw new ResourceNotFoundException(ErrorCode.CUSTOMER_NOT_FOUND);
-//			}
-
 			BigInteger entityId = sequenceGenerator.generateSequence("AccountId_seq");
-			BigInteger intAccNumber = sequenceGenerator.generateSequence("InternalAccNO_seq");
-			BigInteger customerAccNumber = sequenceGenerator.generateSequence("CustomerAccNO_seq");
-			String intAccNumStr = "OMEGA"+intAccNumber.toString();
-			String customerAccountNum = "SB"+ customerAccNumber.toString();
+			String intAccNumStr = this.generateInternalAccountNumber();
+			String customerAccountNum = this.generateCustomerAccountNumber();
 			AccountPk accId = new AccountPk();
 			accId.setAccount_id(entityId.intValue());
 			accId.setAccount_type(AccountsConstants.SAVINGS_ACCOUNT);
@@ -161,17 +155,12 @@ public class Account_services implements Account_Service_Interface {
 	public List<AccountDto> findAllAccounts() {
         logger.debug("Account Finding in :  {}On : {}", this.getClass().getSimpleName(), LocalDate.now());
 
-		List<Account> account;
-		List<AccountDto> accDto = new ArrayList<>();
-		AccountDto accountDto;
-		account = account_repository.findAll();
-		for(Account acc: account) {
-			accountDto = AccountMapper.mapToAccountDto(acc, new AccountDto());
-			accDto.add(accountDto);
-		}
-        logger.debug("Account Finding completed in :  {}On : {}", this.getClass().getSimpleName(), LocalDate.now());
-
-		return accDto;
+		List<Account> accountList;
+		accountList = account_repository.findAll();
+		logger.debug("Account Finding completed in :  {}On : {}", this.getClass().getSimpleName(), LocalDate.now());
+		return  accountList.stream()
+				.map(acc -> AccountMapper.mapToAccountDto(acc, new AccountDto()))
+				.toList();
 	}
 
 	@Override
@@ -186,4 +175,19 @@ public class Account_services implements Account_Service_Interface {
 		return accountDtos;
 	}
 
+	private AccountPk generateAccountPrimaryKey() {
+		BigInteger entityId = sequenceGenerator.generateSequence("AccountId_seq");
+		AccountPk accId = new AccountPk();
+		accId.setAccount_id(entityId.intValue());
+		accId.setAccount_type(AccountsConstants.SAVINGS_ACCOUNT);
+		return accId;
+	}
+
+	private String generateInternalAccountNumber() {
+		return AccountsConstants.INT_ACCOUNT_NUMBER_PREFIX + sequenceGenerator.generateSequence("InternalAccNO_seq");
+	}
+
+	private String generateCustomerAccountNumber() {
+		return AccountsConstants.CUST_ACCOUNT_NUMBER_PREFIX + sequenceGenerator.generateSequence("CustomerAccNO_seq");
+	}
 }
