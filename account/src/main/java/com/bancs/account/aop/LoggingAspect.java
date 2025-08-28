@@ -16,7 +16,7 @@ public class LoggingAspect {
     private static final Logger log = LoggerFactory.getLogger(LoggingAspect.class);
 
     //Aspects manage service-level concerns, like logging method entries and exits.
-    @Around("execution(* com.fin.bancs..*(..))")
+    @Around("execution(* com.bancs.account..*(..))")
     public Object logBefore(ProceedingJoinPoint joinPoint) throws Throwable {
         long start = System.currentTimeMillis();
         Object proceed = joinPoint.proceed();
@@ -25,11 +25,11 @@ public class LoggingAspect {
         return proceed;
     }
 
-    @Before("execution(* com.fin.bancs..*(..))")
+    @Before("execution(* com.bancs.account..*(..))")
     public void beforeMethodCall(JoinPoint joinPoint){
         log.info("Calling Method - {}", joinPoint.getSignature().getName());
     }
-    @After("execution(* com.fin.bancs..*(..))")
+    @After("execution(* com.bancs.account..*(..))")
     public void logAfterCall(JoinPoint joinPoint){
         log.info("Exiting Method - {}",joinPoint.getSignature().getName());
     }

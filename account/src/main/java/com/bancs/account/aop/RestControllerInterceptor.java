@@ -14,13 +14,13 @@ public class RestControllerInterceptor implements HandlerInterceptor {
     private static final Logger logger = LoggerFactory.getLogger(RestControllerInterceptor.class);
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         logger.info("Incoming request: {} {}", request.getMethod(), request.getRequestURI());
         return true; // Proceed to the next interceptor or controller
     }
 
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex){
         logger.info("Request completed for URI: {}", request.getRequestURI());
     }
 }

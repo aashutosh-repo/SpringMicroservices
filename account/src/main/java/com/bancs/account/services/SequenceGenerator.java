@@ -21,7 +21,7 @@ public class SequenceGenerator {
     public BigInteger generateSequence(String sequenceName) {
     Sequence sequence = sequenceRepository.findBySequenceName(sequenceName);
     if (sequence == null) {
-      sequence = new Sequence(sequenceName, BigInteger.valueOf(1L),getNextSeqId());
+      sequence = new Sequence(sequenceName, BigInteger.valueOf(100L),getNextSeqId());
       sequenceRepository.save(sequence);
     } else {
       sequence.setNextValue(sequence.getNextValue().add(BigInteger.valueOf(1L)));

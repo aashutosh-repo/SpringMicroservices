@@ -21,6 +21,7 @@ public class AccountDto {
     
     @Schema(description = "Account Type used for the account", example = "saving")
     protected String accType;
+
     @Schema(description = "Date when the account was opened")
     protected LocalDate account_open_dt;
 
@@ -36,7 +37,6 @@ public class AccountDto {
     @Schema(description = "Type of the customer", example = "1")
     protected int cus_type;
 
-    @NotNull(message = "NPA status cannot be null")
     @Schema(description = "Non-Performing Asset status", example = "0")
     protected int npa_status;
 
@@ -44,7 +44,6 @@ public class AccountDto {
     @Schema(description = "Minimum balance required for the account", example = "500")
     protected int min_bal;
 
-    @NotNull(message = "Last withdrawal date cannot be null")
     @Schema(description = "Date of the last withdrawal", example = "2024-01-15")
     protected Date last_withdrawal_dt;
 
@@ -56,19 +55,15 @@ public class AccountDto {
     @Schema(description = "Name of the account owner", example = "John Doe")
     protected String owner_name;
 
-    @NotNull(message = "ATM request flag cannot be null")
     @Schema(description = "Flag indicating if an ATM request is needed", example = "1")
     protected int atm_req_flag;
 
-    @NotNull(message = "Cheque request flag cannot be null")
     @Schema(description = "Flag indicating if a cheque book is requested", example = "0")
     protected int cheq_req_flag;
 
-    @NotNull(message = "SMS request flag cannot be null")
     @Schema(description = "Flag indicating if SMS alerts are requested", example = "1")
     protected int sms_req_flag;
 
-    @NotNull(message = "Closure date cannot be null")
     @Schema(description = "Date when the account was closed", example = "2024-12-31")
     protected LocalDate clsr_dt;
 

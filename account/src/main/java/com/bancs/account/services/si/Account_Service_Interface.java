@@ -8,6 +8,7 @@ import java.util.List;
 public interface Account_Service_Interface {
 	
 	Account createModifyAccountDetails(AccountDto account, int modifyFlag);
+	void authAccountPendingTransaction(Account account);
 	void deleteAccount(Account account);
 	List<AccountDto> findAllAccounts();
 	List<AccountDto> getAccountByCustomerId(String customerId);

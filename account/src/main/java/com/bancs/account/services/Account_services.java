@@ -84,7 +84,7 @@ public class Account_services implements Account_Service_Interface {
 		
 	}
 	
-	
+	@Override
 	public void authAccountPendingTransaction(Account account) {
 		Account  account_create = tempModifiedEntityService.retrieveTransactionFromTemp
 				(account.getAccountNumber(), Account.class.getName(), Account.class);
@@ -98,31 +98,28 @@ public class Account_services implements Account_Service_Interface {
 	@Override
 	@Transactional
 	@CachePut(value = "accounts", key = "#account.accountNumber")
-	public Account createModifyAccountDetails(AccountDto account, int modifyFlag){
+	public Account createModifyAccountDetails(AccountDto accountDTO, int modifyFlag){
         logger.info("Entered int Creation Task of class : {}On : {}", this.getClass().getSimpleName(), LocalDate.now());
 		//If Modify flag is 1 then primary key should pass as a User-input
 		Account acc;
 		Account accCreate;
 		if(modifyFlag==1) {
-			acc = account_repository.findByAccountNumber(account.getAccount_number());
-			//check the given data is existing in DB or not if yes then proceed
-			acc.setCurrency(account.getCurrency());
-			acc.setOwner_name(account.getOwner_name());
-			acc.setAccount_status(account.getAccount_status());
-			acc.setClsr_dt(account.getClsr_dt());
-			acc.setClsr_reason(acc.getClsr_reason());
-            account_repository.save(acc);
-
-        }
-		else
-		{
+			acc = account_repository.findByAccountNumber(accountDTO.getAccount_number());
+			if(acc.getAccountId() != null) {
+				acc = AccountMapper.mapToAccount(accountDTO, acc);
+				account_repository.save(acc);
+				logger.info("Account Modification Completed :  {}On : {}", this.getClass().getSimpleName(), LocalDate.now());
+			}else {
+				throw new CustomErrorMessage(ErrorCode.ACCOUNT_NOT_FOUND);
+			}
+		} else {
 			BigInteger entityId = sequenceGenerator.generateSequence("AccountId_seq");
 			String intAccNumStr = this.generateInternalAccountNumber();
 			String customerAccountNum = this.generateCustomerAccountNumber();
 			AccountPk accId = new AccountPk();
 			accId.setAccount_id(entityId.intValue());
 			accId.setAccount_type(AccountsConstants.SAVINGS_ACCOUNT);
-			accCreate= AccountMapper.mapToAccount(account, new Account());
+			accCreate= AccountMapper.mapToAccount(accountDTO, new Account());
 			accCreate.setClsr_dt(null);
 			accCreate.setClsr_reason(null);
 			accCreate.setAccountId(accId);
@@ -130,8 +127,7 @@ public class Account_services implements Account_Service_Interface {
 			accCreate.setAccountNumber(customerAccountNum);
 
 			acc= account_repository.save(accCreate);
-            logger.debug("Account Creation Completed :  {}On : {}", this.getClass().getSimpleName(), LocalDate.now());
-
+            logger.info("Account Creation Completed :  {}On : {}", this.getClass().getSimpleName(), LocalDate.now());
 		}
 		return acc;
 	}
@@ -139,15 +135,16 @@ public class Account_services implements Account_Service_Interface {
 	@Override
 	@CacheEvict(value = "accounts", key = "#account.accountId")
 	public void deleteAccount(Account account) {
-        new Account();
         Account account_del;
 		if(account_repository.findById(account.getAccountId()).isPresent()) {
 			account_del = (account_repository.findById(account.getAccountId()).orElseThrow(()-> new CustomErrorMessage(ErrorCode.ACCOUNT_NOT_FOUND)));
 			account_del.setAccount_status(2);
 			account_del.setClsr_dt (account.getClsr_dt());
 			account_repository.save(account_del);
+		}else {
+			throw new CustomErrorMessage(ErrorCode.ACCOUNT_NOT_FOUND);
 		}
-
+		logger.info("Account Deletion Completed :  {}On : {}", this.getClass().getSimpleName(), LocalDate.now());
 	}
 
 	@Override
@@ -168,10 +165,10 @@ public class Account_services implements Account_Service_Interface {
 	public List<AccountDto> getAccountByCustomerId(String customerId){
 		List<Account> accounts;
 		accounts= account_repository.findByCustId(customerId);
-		List<AccountDto> accountDtos = new ArrayList<>(List.of());
-		for(Account ac : accounts){
-			accountDtos.add(AccountMapper.mapToAccountDto(ac,new AccountDto()));
-		}
+		List<AccountDto> accountDtos = new ArrayList<>();
+		accounts.stream()
+				.map(acc -> AccountMapper.mapToAccountDto(acc, new AccountDto()))
+				.forEach(accountDtos::add);
 		return accountDtos;
 	}
 
