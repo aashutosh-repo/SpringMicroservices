@@ -7,6 +7,8 @@ import com.spring.batch.processor.TransactionProcessor;
 import com.spring.batch.reader.TransactionReader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -15,6 +17,8 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.RetryPolicy;
+import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
@@ -48,5 +52,19 @@ import org.springframework.transaction.PlatformTransactionManager;
                 .listener(listener)
                 .start(transactionDataStep())
                 .build();
+    }
+    @Bean
+    public RetryPolicy retryPolicy() { return new SimpleRetryPolicy(3); }
+
+    @Bean
+    JobExecutionListener jobExecutionListener() {
+        return new JobExecutionListener() {
+            @Override public void beforeJob(JobExecution jobExecution) {
+                // insert into audit table…
+            }
+            @Override public void afterJob(JobExecution jobExecution) {
+                // finalize audit…
+            }
+        };
     }
 }
