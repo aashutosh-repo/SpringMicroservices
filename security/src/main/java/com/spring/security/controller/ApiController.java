@@ -28,7 +28,7 @@ public class ApiController {
 
     @PostMapping("/register")
     public String register(@RequestBody UserRequestDTO request, @RequestParam List<String> roles) {
-        return authService.registerUser(request.getUsername(), request.getPassword());
+        return authService.registerUser(request.getUsername(), request.getPassword(), roles);
     }
 
     @PostMapping("/login")
