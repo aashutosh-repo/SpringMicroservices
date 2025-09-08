@@ -53,18 +53,18 @@ import org.springframework.transaction.PlatformTransactionManager;
                 .start(transactionDataStep())
                 .build();
     }
-    @Bean
-    public RetryPolicy retryPolicy() { return new SimpleRetryPolicy(3); }
-
-    @Bean
-    JobExecutionListener jobExecutionListener() {
-        return new JobExecutionListener() {
-            @Override public void beforeJob(JobExecution jobExecution) {
-                // insert into audit table…
-            }
-            @Override public void afterJob(JobExecution jobExecution) {
-                // finalize audit…
-            }
-        };
-    }
+//    @Bean
+//    public RetryPolicy retryPolicy() { return new SimpleRetryPolicy(3); }
+//
+//    @Bean
+//    JobExecutionListener jobExecutionListener() {
+//        return new JobExecutionListener() {
+//            @Override public void beforeJob(JobExecution jobExecution) {
+//                // insert into audit table…
+//            }
+//            @Override public void afterJob(JobExecution jobExecution) {
+//                // finalize audit…
+//            }
+//        };
+//    }
 }
