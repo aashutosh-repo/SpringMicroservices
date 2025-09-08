@@ -55,14 +55,13 @@ public class FileUploadController {
     }
 
     @GetMapping("/uploads")
-    public ResponseEntity<List<FileMetadata>> getFileMetadata(
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(defaultValue = "20") int size
+    public ResponseEntity<Page<FileMetadata>> getFileMetadata(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
     ){
-//        Pageable pageable = PageRequest.of(page, size, Sort.by("uploadedAt").descending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("uploadedAt").descending());
 
-//        Page<FileMetadata> metadata = uploadFileRepository.findByFileType(FileConstants.FILE_TYPE_TRANSACTION, pageable);
-        List<FileMetadata> allMetadata = uploadFileRepository.findAll(Sort.by("uploadedAt").descending());
-        return ResponseEntity.ok(allMetadata);
+        Page<FileMetadata> metadata = uploadFileRepository.findByFileType(FileConstants.FILE_TYPE_TRANSACTION, pageable);
+        return ResponseEntity.ok(metadata);
     }
 }
