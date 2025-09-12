@@ -75,6 +75,8 @@ public class AuthService {
         response.setExpiryTime(expiryTime);
         response.setUserName(entity.getUsername());
         response.setLastLogin(LocalDateTime.now());
+        response.setUserName("TestUser");
+        response.setLastName("TestLastName");
         return response;
     }
 

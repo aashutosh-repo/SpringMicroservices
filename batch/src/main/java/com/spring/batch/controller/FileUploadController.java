@@ -60,7 +60,6 @@ public class FileUploadController {
             @RequestParam(defaultValue = "20") int size
     ){
         Pageable pageable = PageRequest.of(page, size, Sort.by("uploadedAt").descending());
-
         Page<FileMetadata> metadata = uploadFileRepository.findByFileType(FileConstants.FILE_TYPE_TRANSACTION, pageable);
         return ResponseEntity.ok(metadata);
     }
