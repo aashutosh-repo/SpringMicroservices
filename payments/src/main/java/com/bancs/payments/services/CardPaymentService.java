@@ -28,7 +28,7 @@ public class CardPaymentService {
         String payload = request.getToken();
 
         if (payload == null || payload.isEmpty()) {
-            return new PaymentResponse("FAILED", "card Details not Found");
+            return PaymentResponse.failureResponse("Missing encrypted payload");
         }
         // Step 1: Decrypt/Tokenize
         String decryptedData = coreServiceClient.callDecryptService(payload);
@@ -51,9 +51,9 @@ public class CardPaymentService {
             // Step 4: Save to Ledger
             ledgerService.recordTransaction(request, networkResponse);
 
-            return new PaymentResponse("SUCCESS", networkResponse.getAuthCode());
+            return PaymentResponse.successResponse();
         } else {
-            return new PaymentResponse("DECLINED", networkResponse.getDeclineReason());
+            return PaymentResponse.failureResponse("Card authorization failed: " + "500");
         }
     }
 }

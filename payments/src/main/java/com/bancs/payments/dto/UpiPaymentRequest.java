@@ -1,6 +1,5 @@
 package com.bancs.payments.dto;
 
-import com.bancs.payments.utility.BillingAddress;
 import com.bancs.payments.utility.PaymentRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

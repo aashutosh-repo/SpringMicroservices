@@ -15,6 +15,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import javax.crypto.SecretKey;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -81,19 +82,61 @@ public class PaymentController {
         return switch (request.getPaymentMethod()) {
             case "UPI" -> {
                 UpiPaymentRequest upiPaymentRequest = (UpiPaymentRequest) request;
-                yield ResponseEntity.ok(new PaymentResponse("201", " UPI Success"));
+//                PaymentSummary paymentSummary= paymentService.initiatePayment(upiPaymentRequest.getCustomerId(), "1");
+                yield ResponseEntity.ok(PaymentResponse.successResponse());
                 //upi payment Logic here
             }
             case "CARD" -> {
                 CardPaymentRequest cardPaymentRequest = (CardPaymentRequest) request;
-                yield ResponseEntity.ok(new PaymentResponse("201", " CARD Success"));
+                yield ResponseEntity.ok(PaymentResponse.successResponse());
                 //Handle CARD payment Request
             }
             case "NET_BANKING" -> {
                 NetBankingPaymentRequest netBankingPaymentRequest = (NetBankingPaymentRequest) request;
-                yield ResponseEntity.ok(new PaymentResponse("201", "Net Banking Success"));
+                yield ResponseEntity.ok(PaymentResponse.successResponse());
             }
-            default -> ResponseEntity.ok(new PaymentResponse("201", "Success"));
+            default -> ResponseEntity.ok(PaymentResponse.failureResponse("Unsupported payment method"));
         };
     }
+
+//    @PostMapping("/callback")  // Gateway calls this after payment
+//    public ResponseEntity<Void> paymentCallback(@RequestBody PhonePeCallbackDTO response) {
+//        paymentService.updatePaymentStatus(response);
+//        return ResponseEntity.ok().build();
+//    }
+
+    @PostMapping("/callback/phonepe")
+    public ResponseEntity<PaymentResponse> handlePhonePeCallback(@RequestBody PhonePeCallbackDTO dto) {
+        PaymentResponse response = new PaymentResponse(
+                dto.getTransactionId(),
+                "PHONEPE",
+                dto.getStatus().equals("SUCCESS") ? "SUCCESS" : "FAILURE",
+                String.valueOf(dto.getAmount() / 100.0),   // convert paise to rupees
+                dto.getPaymentInstrument().getType(),
+                dto.getProviderReferenceId(),
+                "Payment via PhonePe",
+                LocalDateTime.now().toString()
+        );
+
+//        paymentService.updatePaymentStatus(response);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/callback/paytm")
+    public ResponseEntity<PaymentResponse> handlePaytmCallback(@RequestBody PaytmCallbackDTO dto) {
+        PaymentResponse response = new PaymentResponse(
+                dto.getOrderId(),
+                "PAYTM",
+                dto.getStatus().equals("TXN_SUCCESS") ? "SUCCESS" : "FAILURE",
+                dto.getTxnAmount(),
+                dto.getPaymentMode(),
+                dto.getTxnId(),
+                dto.getMId(),
+                dto.getTxnDate()
+        );
+
+        paymentService.updatePaymentStatus(response);
+        return ResponseEntity.ok(response);
+    }
+
 }

@@ -1,12 +1,10 @@
 package com.bancs.payments.services;
 
-import com.bancs.payments.dto.AccountDto;
-import com.bancs.payments.dto.CustomerDto;
-import com.bancs.payments.dto.PaymentSummary;
-import com.bancs.payments.dto.TransactionDTO;
+import com.bancs.payments.dto.*;
 import com.bancs.payments.entity.Transaction;
 import com.bancs.payments.mapper.TransactionMapper;
 import com.bancs.payments.repository.PaymentsRepository;
+import com.bancs.payments.utility.PaymentRequest;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,16 +22,14 @@ public class PaymentService {
 
     private static final Logger log = LoggerFactory.getLogger(PaymentService.class);
     private final PaymentsRepository paymentsRepository;
+    private final WebClient.Builder webClientBuilder;
 
     public List<TransactionDTO> getTransactionDetails(){
         List<Transaction> transactionList = paymentsRepository.findAll();
         return transactionList.stream().map(TransactionMapper::toDTO).toList();
     }
 
-
-    private final WebClient.Builder webClientBuilder;
-
-    public Mono<PaymentSummary> initiatePayment(String customerId, String customerType) {
+    public PaymentSummary initiatePayment(String customerId, String customerType) {
 
         Mono<CustomerDto> customerMono = webClientBuilder.build()
                 .get()
@@ -67,6 +63,17 @@ public class PaymentService {
 
                     // Custom logic to build payment summary
                     return new PaymentSummary(customer, accounts.getFirst());
-                });
+                }).block();
+    }
+
+    public String initiate(PaymentRequest req) {
+        // generate orderId, call PhonePe/Paytm API
+        // return their redirect URL
+        return "https://paytm.com/checkout?txnId=123";
+    }
+
+    public void updatePaymentStatus(PaymentResponse response) {
+        // verify signature from gateway
+        // update DB: mark order SUCCESS/FAILED
     }
 }
