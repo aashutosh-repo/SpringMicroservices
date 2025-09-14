@@ -4,6 +4,7 @@ import com.bancs.payments.dto.*;
 import com.bancs.payments.services.CoreServiceClient;
 import com.bancs.payments.services.EncryptionUtil;
 import com.bancs.payments.services.PaymentService;
+import com.bancs.payments.services.TransactionService;
 import com.bancs.payments.utility.PaymentRequest;
 import lombok.AllArgsConstructor;
 import org.apache.logging.log4j.LogManager;
@@ -11,8 +12,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import javax.crypto.SecretKey;
 import java.time.LocalDateTime;
@@ -28,6 +27,7 @@ public class PaymentController {
     private static final String PAYLOAD= "payload";
     private final CoreServiceClient coreServiceClient;
     private final PaymentService paymentService;
+    private TransactionService transactionService;
 
     @PostMapping("/process-payment")
     public ResponseEntity<Map<String,String>> processPayment(@RequestBody Map<String, String> requestData){
@@ -82,7 +82,13 @@ public class PaymentController {
         return switch (request.getPaymentMethod()) {
             case "UPI" -> {
                 UpiPaymentRequest upiPaymentRequest = (UpiPaymentRequest) request;
-//                PaymentSummary paymentSummary= paymentService.initiatePayment(upiPaymentRequest.getCustomerId(), "1");
+                TransactionDTO transactionDTO= new TransactionDTO();
+                transactionDTO.setTransactionAmount(upiPaymentRequest.getAmount());
+                transactionDTO.setCurrency(upiPaymentRequest.getCurrency());
+                transactionDTO.setCustomerId(upiPaymentRequest.getCustomerId());
+                transactionDTO.setMerchantName(upiPaymentRequest.getMerchantId());
+                transactionDTO.setTransactionType(upiPaymentRequest.getPaymentMethod());
+                PaymentInitResponse paymentInitResponse= transactionService.initiateTransaction(transactionDTO);
                 yield ResponseEntity.ok(PaymentResponse.successResponse());
                 //upi payment Logic here
             }
@@ -136,6 +142,12 @@ public class PaymentController {
         );
 
         paymentService.updatePaymentStatus(response);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{txnId}/status")
+    public ResponseEntity<PaymentResponse> getStatus(@PathVariable String txnId) {
+        PaymentResponse response = transactionService.getTransactionStatus(txnId);
         return ResponseEntity.ok(response);
     }
 

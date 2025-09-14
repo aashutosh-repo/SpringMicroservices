@@ -2,9 +2,12 @@ package com.bancs.payments.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class PaymentResponse {
     private String transactionId;   // your internal txn ID
     private String gateway;         // PHONEPE / PAYTM / RAZORPAY

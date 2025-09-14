@@ -19,11 +19,15 @@ public class Transaction {
     @Column(name = "transaction_id", nullable = false, updatable = false)
     private String transactionId;
 
+    private String extRefId; // External Reference ID from payment gateway or external system
+
+    @Column(name = "txn_seq")
+    private Long txnSeq;
     // Basic Transaction Details
     @Column(name = "customer_id", nullable = false)
     private String customerId;
 
-    @Column(name = "account_number", nullable = false)
+    @Column(name = "account_number", nullable = true)
     private String accountNumber;
 
     @Column(name = "transaction_type", nullable = false)
@@ -38,11 +42,17 @@ public class Transaction {
     @Column(name = "transaction_amount", precision = 18, scale = 2, nullable = false)
     private BigDecimal transactionAmount;
 
+    @Column(name = "cr_dr_flag", length = 2)
+    private int crDrFlag; // 1 for Credit, 2 for Debit
+
     @Column(name = "currency", length = 3)
     private String currency; // e.g., INR, USD
 
     @Column(name = "transaction_status")
     private String transactionStatus; // Success, Failed, Pending
+
+    @Column(name = "txn_desc")
+    private String txnDesc;
 
     @Column(name = "transaction_datetime")
     private LocalDateTime transactionDatetime;
@@ -147,4 +157,5 @@ public class Transaction {
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
 }
