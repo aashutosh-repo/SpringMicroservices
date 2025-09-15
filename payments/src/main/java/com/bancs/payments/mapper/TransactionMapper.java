@@ -9,6 +9,7 @@ public class TransactionMapper {
     public static TransactionDTO toDTO(Transaction txn) {
         TransactionDTO dto = new TransactionDTO();
         dto.setTransactionId(txn.getTransactionId());
+        dto.setOrderId(txn.getExtRefId());
         dto.setCustomerId(txn.getCustomerId());
         dto.setAccountNumber(txn.getAccountNumber());
         dto.setTransactionType(txn.getTransactionType());
@@ -30,6 +31,7 @@ public class TransactionMapper {
         if (dto == null) return null;
         Transaction txn = new Transaction();
         txn.setTransactionId(dto.getTransactionId());
+        txn.setExtRefId(dto.getOrderId());
         txn.setCustomerId(dto.getCustomerId());
         txn.setAccountNumber(dto.getAccountNumber());
         txn.setTransactionType(dto.getTransactionType());

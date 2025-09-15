@@ -8,6 +8,7 @@ import com.bancs.payments.entity.Transaction;
 import com.bancs.payments.error.ResourceNotFoundException;
 import com.bancs.payments.mapper.TransactionMapper;
 import com.bancs.payments.repository.PaymentsRepository;
+import com.bancs.payments.utility.SequenceGenerator;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,16 +24,19 @@ public class TransactionService {
     private static final Logger log = LogManager.getLogger(TransactionService.class);
 
     private final PaymentsRepository transactionsRepository;
-
+    private final SequenceGenerator sequenceGenerator;
 
 
     public PaymentInitResponse initiateTransaction(TransactionDTO transactionDTO) {
 
         //Step1: Order Creation in Transaction Table with status INITIATED
         Transaction transaction = TransactionMapper.toEntity(transactionDTO);
+        String transactionId = sequenceGenerator.generateSequence("transaction_sequence").toString();
+        transaction.setTransactionId(transactionId);
         transaction.setTransactionStatus(String.valueOf(TransactionConstants.TransactionStatus.INITIATED));
         transaction.setTransactionDatetime(LocalDateTime.now());
         transaction.setCreatedAt(LocalDateTime.now());
+
         log.info("Initiating transaction for Transaction: {}", transaction.getTransactionId());
         transactionsRepository.save(transaction);
 

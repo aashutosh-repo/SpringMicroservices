@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 @Data
 public class TransactionDTO {
     private String transactionId;
+    private String orderId;
     private String customerId;
     private String accountNumber;
     private String transactionType;

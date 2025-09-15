@@ -88,6 +88,7 @@ public class PaymentController {
                 transactionDTO.setCustomerId(upiPaymentRequest.getCustomerId());
                 transactionDTO.setMerchantName(upiPaymentRequest.getMerchantId());
                 transactionDTO.setTransactionType(upiPaymentRequest.getPaymentMethod());
+                transactionDTO.setOrderId(upiPaymentRequest.getOrderId());
                 PaymentInitResponse paymentInitResponse= transactionService.initiateTransaction(transactionDTO);
                 yield ResponseEntity.ok(PaymentResponse.successResponse());
                 //upi payment Logic here
@@ -105,12 +106,6 @@ public class PaymentController {
         };
     }
 
-//    @PostMapping("/callback")  // Gateway calls this after payment
-//    public ResponseEntity<Void> paymentCallback(@RequestBody PhonePeCallbackDTO response) {
-//        paymentService.updatePaymentStatus(response);
-//        return ResponseEntity.ok().build();
-//    }
-
     @PostMapping("/callback/phonepe")
     public ResponseEntity<PaymentResponse> handlePhonePeCallback(@RequestBody PhonePeCallbackDTO dto) {
         PaymentResponse response = new PaymentResponse(
@@ -123,8 +118,6 @@ public class PaymentController {
                 "Payment via PhonePe",
                 LocalDateTime.now().toString()
         );
-
-//        paymentService.updatePaymentStatus(response);
         return ResponseEntity.ok(response);
     }
 

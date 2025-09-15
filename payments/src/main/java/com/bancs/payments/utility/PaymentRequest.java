@@ -32,5 +32,6 @@ public abstract class PaymentRequest {
     private String customerId;
     private BigDecimal amount;
     private String currency;
+    private String orderId;
     private BillingAddress billingAddress;
 }

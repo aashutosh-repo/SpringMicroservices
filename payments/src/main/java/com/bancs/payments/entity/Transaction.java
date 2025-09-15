@@ -15,7 +15,7 @@ public class Transaction {
 
     // Primary Key
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+//    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "transaction_id", nullable = false, updatable = false)
     private String transactionId;
 
