@@ -104,6 +104,11 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.squareup</groupId>
+			<artifactId>square</artifactId>
+			<version>45.0.2.20250820</version>
+		</dependency>
 	</dependencies>
 
 	<build>

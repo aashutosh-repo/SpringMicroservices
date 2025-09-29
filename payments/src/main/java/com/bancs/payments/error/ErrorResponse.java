@@ -11,6 +11,8 @@ public class ErrorResponse {
 	private String path;
     private HttpStatus errorCode;
     private String errorDescription;
-    private LocalDateTime timestamp;    
-    
+    private LocalDateTime timestamp;
+
+    public ErrorResponse(String paymentFailed, String message) {
+    }
 }

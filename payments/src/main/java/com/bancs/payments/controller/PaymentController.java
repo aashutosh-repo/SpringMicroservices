@@ -1,22 +1,33 @@
 package com.bancs.payments.controller;
 
 import com.bancs.payments.dto.*;
+import com.bancs.payments.error.ErrorResponse;
 import com.bancs.payments.services.CoreServiceClient;
 import com.bancs.payments.services.EncryptionUtil;
 import com.bancs.payments.services.PaymentService;
 import com.bancs.payments.services.TransactionService;
 import com.bancs.payments.utility.PaymentRequest;
+import com.squareup.square.SquareClient;
+import com.squareup.square.types.CreatePaymentRequest;
+import com.squareup.square.types.Currency;
+import com.squareup.square.types.Money;
 import lombok.AllArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import javax.crypto.SecretKey;
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/payments")
@@ -28,6 +39,8 @@ public class PaymentController {
     private final CoreServiceClient coreServiceClient;
     private final PaymentService paymentService;
     private TransactionService transactionService;
+    private final SquareClient squareClient;
+
 
     @PostMapping("/process-payment")
     public ResponseEntity<Map<String,String>> processPayment(@RequestBody Map<String, String> requestData){
@@ -143,5 +156,49 @@ public class PaymentController {
         PaymentResponse response = transactionService.getTransactionStatus(txnId);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/upi/collect")
+    public ResponseEntity<?> createUpiCollect(@RequestBody UpiPaymentRequest req) {
+        RestTemplate rest = new RestTemplate();
+
+        String url = "https://api.razorpay.com/v1/payments";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth("rzp_test_RKNJV39SvXgbzi", "LpIcU2RkQLtgYnWwwz5utler");
+
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("amount", req.getAmount()); // in paise (10000 = ₹100)
+        payload.put("currency", "INR");
+        payload.put("method", "upi");
+        payload.put("vpa", req.getUpiId()); // e.g. aashutosh@paytm
+        payload.put("description", "Test Order");
+
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
+
+        ResponseEntity<String> response = rest.postForEntity(url, request, String.class);
+
+        return response;
+    }
+
+
+    @PostMapping
+    public Object createPayment(@RequestBody PaymentRequest dto) {
+        Money amountMoney = Money.builder()
+                .amount(dto.getAmount().longValue() * 100L)
+                .currency(Currency.INR)   // ✅ enum, not "INR"
+                .build();
+
+        CreatePaymentRequest request = CreatePaymentRequest.builder()
+                .sourceId("cnon:card-nonce-ok")              // REQUIRED
+                .idempotencyKey(UUID.randomUUID().toString()) // REQUIRED
+                .amountMoney(amountMoney)                     // REQUIRED
+                .autocomplete(true)                           // optional
+                .note("Test Payment")
+                .build();
+
+        var response = squareClient.payments().create(request);
+        return response.getPayment();
+    }
+
 
 }
