@@ -1,9 +1,6 @@
 package com.bancs.payments.services;
 
-import com.bancs.payments.dto.UpiPaymentRequest;
-import com.bancs.payments.dto.UpiPaymentRequests;
 import com.bancs.payments.dto.UpiPaymentResponse;
-import com.bancs.payments.utility.HashUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -11,14 +8,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.HtmlUtils;
 
 import java.security.MessageDigest;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
-
-import static com.bancs.payments.utility.HashUtil.generateHash;
 
 @Service
 @RequiredArgsConstructor
@@ -92,6 +87,66 @@ public class PayuUpiService {
         byte[] messageDigest = md.digest(input.getBytes());
         StringBuilder sb = new StringBuilder();
         for (byte b : messageDigest) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
+
+    public String buildHostedCheckoutForm(String orderId,
+                                          String amount,
+                                          String firstname,
+                                          String email,
+                                          String phone) throws Exception {
+
+        String txnid = orderId;  // or generate unique txn id
+        String productinfo = "MyProduct";
+        String surl = "http://localhost:8085/payments/payu/success";
+        String furl = "https://www.paymeindia.in/";
+
+        // Hash string: key|txnid|amount|productinfo|firstname|email||||||||||salt
+        String hashString = merchantKey + "|" + txnid + "|" + amount + "|" + productinfo + "|" +
+                firstname + "|" + email + "|||||||||||" + merchantSalt;
+
+        String hash = hashSha512(hashString);
+
+        // Build the HTML auto-submit form
+        StringBuilder html = new StringBuilder();
+        html.append("<html><body onload='document.forms[\"payu_form\"].submit()'>\n");
+        html.append("<form id='payu_form' method='post' action='")
+                .append(HtmlUtils.htmlEscape(baseUrl+"/_payment")).append("'>\n");
+
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("key", merchantKey);
+        params.put("txnid", txnid);
+        params.put("amount", amount);
+        params.put("productinfo", productinfo);
+        params.put("firstname", firstname);
+        params.put("email", email);
+        params.put("phone", phone);
+        params.put("surl", surl);
+        params.put("furl", furl);
+        params.put("hash", hash);
+
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            html.append("<input type='hidden' name='")
+                    .append(HtmlUtils.htmlEscape(entry.getKey()))
+                    .append("' value='")
+                    .append(HtmlUtils.htmlEscape(entry.getValue()))
+                    .append("'/>\n");
+        }
+
+        html.append("</form>\n");
+        html.append("<p>Redirecting to PayU...</p>\n");
+        html.append("</body></html>");
+
+        return html.toString();
+    }
+
+    public static String hashSha512(String str) throws Exception {
+        MessageDigest md = MessageDigest.getInstance("SHA-512");
+        byte[] digest = md.digest(str.getBytes());
+        StringBuilder sb = new StringBuilder();
+        for (byte b : digest) {
             sb.append(String.format("%02x", b));
         }
         return sb.toString();

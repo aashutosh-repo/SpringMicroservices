@@ -2,44 +2,46 @@ package com.bancs.payments.controller;
 
 import com.bancs.payments.dto.*;
 import com.bancs.payments.error.ErrorResponse;
-import com.bancs.payments.services.CoreServiceClient;
-import com.bancs.payments.services.EncryptionUtil;
-import com.bancs.payments.services.PaymentService;
-import com.bancs.payments.services.TransactionService;
+import com.bancs.payments.services.*;
 import com.bancs.payments.utility.PaymentRequest;
 import com.squareup.square.SquareClient;
 import com.squareup.square.types.CreatePaymentRequest;
 import com.squareup.square.types.Currency;
 import com.squareup.square.types.Money;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.HtmlUtils;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.security.MessageDigest;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping("/payments")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class PaymentController {
 
+
+    @Value("${payu.merchant-key}")
+    private String merchantKey;
+
+    @Value("${payu.merchant-salt}")
+    private String merchantSalt;
     private static final Logger log = LogManager.getLogger(PaymentController.class);
     private static final String PAYLOAD= "payload";
     private final CoreServiceClient coreServiceClient;
     private final PaymentService paymentService;
     private TransactionService transactionService;
     private final SquareClient squareClient;
+    private final PayuUpiService payUService;
 
 
     @PostMapping("/process-payment")
@@ -198,6 +200,51 @@ public class PaymentController {
 
         var response = squareClient.payments().create(request);
         return response.getPayment();
+    }
+
+    @PostMapping(path = "/payu/hostedRedirect", produces = MediaType.TEXT_HTML_VALUE)
+    public String hostedRedirect(@RequestBody PayURequest request) throws Exception {
+        // Prepare parameters
+        return payUService.buildHostedCheckoutForm(request.getOrderId(),
+                request.getAmount(),
+                request.getFirstname(),
+                request.getEmail(),
+                request.getPhone());
+    }
+
+    // endpoints for success / failure callbacks
+    @PostMapping("/payu/success")
+    @ResponseBody
+    public ResponseEntity<String> handleSuccess(@RequestParam Map<String, String> params) throws Exception {
+        // ✅ Step 1: Verify hash
+        String receivedHash = params.get("hash");
+        String txnid = params.get("txnid");
+        String amount = params.get("amount");
+        String productinfo = params.get("productinfo");
+        String firstname = params.get("firstname");
+        String email = params.get("email");
+
+        String hashString = merchantSalt + "|" + params.get("status") + "|||||||||||" + email + "|" +
+                firstname + "|" + productinfo + "|" + amount + "|" + txnid + "|" + merchantKey;
+
+        String calculatedHash = PayuUpiService.hashSha512(hashString);
+
+        if (!calculatedHash.equals(receivedHash)) {
+            return ResponseEntity.badRequest().body("Hash verification failed!");
+        }
+
+        // ✅ Step 2: Update DB order status
+        // orderService.markPaid(txnid, params);
+
+        // ✅ Step 3: Respond to PayU (backend confirmation)
+        return ResponseEntity.ok("SUCCESS");
+    }
+
+    @PostMapping("/payu/failure")
+    @ResponseBody
+    public String failure(@RequestParam Map<String, String> params) {
+        // Verify hash, update DB, etc.
+        return "PayU Failure: " + params.toString();
     }
 
 
