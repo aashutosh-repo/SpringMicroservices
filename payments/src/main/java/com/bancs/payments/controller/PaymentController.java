@@ -41,7 +41,7 @@ public class PaymentController {
     private final PaymentService paymentService;
     private TransactionService transactionService;
     private final SquareClient squareClient;
-    private final PayuUpiService payUService;
+    private final PayUService payUService;
 
 
     @PostMapping("/process-payment")
@@ -205,11 +205,7 @@ public class PaymentController {
     @PostMapping(path = "/payu/hostedRedirect", produces = MediaType.TEXT_HTML_VALUE)
     public String hostedRedirect(@RequestBody PayURequest request) throws Exception {
         // Prepare parameters
-        return payUService.buildHostedCheckoutForm(request.getOrderId(),
-                request.getAmount(),
-                request.getFirstname(),
-                request.getEmail(),
-                request.getPhone());
+        return payUService.buildHostedCheckoutForm(request);
     }
 
     // endpoints for success / failure callbacks
@@ -227,7 +223,7 @@ public class PaymentController {
         String hashString = merchantSalt + "|" + params.get("status") + "|||||||||||" + email + "|" +
                 firstname + "|" + productinfo + "|" + amount + "|" + txnid + "|" + merchantKey;
 
-        String calculatedHash = PayuUpiService.hashSha512(hashString);
+        String calculatedHash = PayUService.hashSha512(hashString);
 
         if (!calculatedHash.equals(receivedHash)) {
             return ResponseEntity.badRequest().body("Hash verification failed!");

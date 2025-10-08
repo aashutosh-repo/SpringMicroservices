@@ -1,8 +1,7 @@
 package com.bancs.payments.controller;
 
-import com.bancs.payments.dto.UpiPaymentRequests;
 import com.bancs.payments.dto.UpiPaymentResponse;
-import com.bancs.payments.services.PayuUpiService;
+import com.bancs.payments.services.PayUService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +13,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class PayuUpiController {
 
-    private final PayuUpiService payuService;
+    private final PayUService payuService;
 
     @Operation(summary = "Initiate UPI Payment via PayU Sandbox")
     @PostMapping("/pay")

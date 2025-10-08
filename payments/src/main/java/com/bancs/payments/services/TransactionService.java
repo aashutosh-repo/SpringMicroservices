@@ -46,7 +46,7 @@ public class TransactionService {
         //Step3: Save gateway transaction details
         PaymentGatewayTransaction pgTxn = new PaymentGatewayTransaction();
 //        pgTxn.setTransaction(txn);
-        pgTxn.setGatewayName("Razorpay");
+        pgTxn.setGatewayName(transactionDTO.getChannel());
         pgTxn.setGatewayOrderId(response.getGatewayOrderId());
         pgTxn.setGatewayStatus("PENDING");
         pgTxn.setRawResponse(response.getRawResponse());

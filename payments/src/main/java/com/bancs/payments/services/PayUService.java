@@ -1,6 +1,7 @@
 package com.bancs.payments.services;
 
-import com.bancs.payments.dto.UpiPaymentResponse;
+import com.bancs.payments.constants.TransactionConstants;
+import com.bancs.payments.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -10,6 +11,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.HtmlUtils;
 
+import java.math.BigDecimal;
 import java.security.MessageDigest;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -17,7 +19,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class PayuUpiService {
+public class PayUService {
 
     @Value("${payu.base-url}")
     private String baseUrl;
@@ -27,6 +29,7 @@ public class PayuUpiService {
 
     @Value("${payu.merchant-salt}")
     private String merchantSalt;
+    private final TransactionService transactionService;
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -92,20 +95,22 @@ public class PayuUpiService {
         return sb.toString();
     }
 
-    public String buildHostedCheckoutForm(String orderId,
-                                          String amount,
-                                          String firstname,
-                                          String email,
-                                          String phone) throws Exception {
+    public String buildHostedCheckoutForm(PayURequest request) throws Exception {
 
-        String txnid = orderId;  // or generate unique txn id
+        String txnid = request.getOrderId();  // or generate unique txn id
         String productinfo = "MyProduct";
         String surl = "http://localhost:8085/payments/payu/success";
-        String furl = "https://www.paymeindia.in/";
+        String furl = "http://localhost:8085/payments/payu/failure";
 
+
+        //initiate the payment request
+        PaymentInitResponse response = initiatePaymentRequest(request);
+        if (response.getTransactionId() == null) {
+            throw new Exception("Failed to initiate transaction");
+        }
         // Hash string: key|txnid|amount|productinfo|firstname|email||||||||||salt
-        String hashString = merchantKey + "|" + txnid + "|" + amount + "|" + productinfo + "|" +
-                firstname + "|" + email + "|||||||||||" + merchantSalt;
+        String hashString = merchantKey + "|" + response.getTransactionId() + "|" + request.getAmount() + "|" + productinfo + "|" +
+                request.getFirstname() + "|" + request.getEmail() + "|||||||||||" + merchantSalt;
 
         String hash = hashSha512(hashString);
 
@@ -118,11 +123,11 @@ public class PayuUpiService {
         Map<String, String> params = new LinkedHashMap<>();
         params.put("key", merchantKey);
         params.put("txnid", txnid);
-        params.put("amount", amount);
+        params.put("amount", request.getAmount());
         params.put("productinfo", productinfo);
-        params.put("firstname", firstname);
-        params.put("email", email);
-        params.put("phone", phone);
+        params.put("firstname", request.getFirstname());
+        params.put("email", request.getEmail());
+        params.put("phone", request.getPhone());
         params.put("surl", surl);
         params.put("furl", furl);
         params.put("hash", hash);
@@ -140,6 +145,21 @@ public class PayuUpiService {
         html.append("</body></html>");
 
         return html.toString();
+    }
+
+
+
+    private PaymentInitResponse initiatePaymentRequest(PayURequest request) {
+        TransactionDTO transaction = new TransactionDTO();
+        transaction.setTransactionAmount(BigDecimal.valueOf(Double.parseDouble(request.getAmount())));
+        transaction.setCurrency("INR");
+        //capture other details as needed
+//        transaction.setTransactionType(request.getpaymentMethod);
+//        transaction.setDescription("Payment for Order ID: " + request.getOrderId());
+//        transaction.setMerchantName(request.getGateway);
+        transaction.setTransactionMode(String.valueOf(TransactionConstants.UPI));
+        transaction.setTransactionStatus(String.valueOf(TransactionConstants.TransactionStatus.INITIATED));
+         return transactionService.initiateTransaction(transaction);
     }
 
     public static String hashSha512(String str) throws Exception {

@@ -9,7 +9,5 @@ public class PayURequest {
     private String firstname;
     private String email;
     private String phone;
-
-    // getters and setters
 }
 
