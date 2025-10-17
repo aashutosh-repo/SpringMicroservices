@@ -97,7 +97,7 @@ public class PayUService {
 
     public String buildHostedCheckoutForm(PayURequest request) throws Exception {
 
-        String txnid = request.getOrderId();  // or generate unique txn id
+        String txnId = request.getOrderId();  // or generate unique txn id
         String productinfo = "MyProduct";
         String surl = "http://localhost:8085/payments/payu/success";
         String furl = "http://localhost:8085/payments/payu/failure";
@@ -109,8 +109,10 @@ public class PayUService {
             throw new Exception("Failed to initiate transaction");
         }
         // Hash string: key|txnid|amount|productinfo|firstname|email||||||||||salt
-        String hashString = merchantKey + "|" + response.getTransactionId() + "|" + request.getAmount() + "|" + productinfo + "|" +
-                request.getFirstname() + "|" + request.getEmail() + "|||||||||||" + merchantSalt;
+//        String hashString = merchantKey + "|" + response.getTransactionId() + "|" + request.getAmount() + "|" + productinfo + "|" +
+//                request.getFirstname() + "|" + request.getEmail() + "||||||" + merchantSalt;
+        String hashString = merchantKey + "|" + txnId + "|" + request.getAmount() + "|" + productinfo + "|" +
+                request.getFirstname() + "|" + request.getEmail() + "|||||||||||"+ merchantSalt;
 
         String hash = hashSha512(hashString);
 
@@ -122,7 +124,7 @@ public class PayUService {
 
         Map<String, String> params = new LinkedHashMap<>();
         params.put("key", merchantKey);
-        params.put("txnid", txnid);
+        params.put("txnid", txnId);
         params.put("amount", request.getAmount());
         params.put("productinfo", productinfo);
         params.put("firstname", request.getFirstname());
@@ -147,12 +149,11 @@ public class PayUService {
         return html.toString();
     }
 
-
-
     private PaymentInitResponse initiatePaymentRequest(PayURequest request) {
         TransactionDTO transaction = new TransactionDTO();
         transaction.setTransactionAmount(BigDecimal.valueOf(Double.parseDouble(request.getAmount())));
         transaction.setCurrency("INR");
+        transaction.setTransactionId(request.getOrderId());
         //capture other details as needed
 //        transaction.setTransactionType(request.getpaymentMethod);
 //        transaction.setDescription("Payment for Order ID: " + request.getOrderId());
@@ -160,6 +161,22 @@ public class PayUService {
         transaction.setTransactionMode(String.valueOf(TransactionConstants.UPI));
         transaction.setTransactionStatus(String.valueOf(TransactionConstants.TransactionStatus.INITIATED));
          return transactionService.initiateTransaction(transaction);
+    }
+
+    public boolean verifyTransactionHash(Map<String, String> params) throws Exception {
+        String receivedHash = params.get("hash");
+        String txnId = params.get("txnid");
+        String amount = params.get("amount");
+        String productinfo = params.get("productinfo");
+        String firstname = params.get("firstname");
+        String email = params.get("email");
+
+        String hashString = merchantSalt + "|" + params.get("status") + "|||||||||||" + email + "|" +
+                firstname + "|" + productinfo + "|" + amount + "|" + txnId + "|" + merchantKey;
+
+        String calculatedHash = PayUService.hashSha512(hashString);
+
+        return calculatedHash.equals(receivedHash);
     }
 
     public static String hashSha512(String str) throws Exception {

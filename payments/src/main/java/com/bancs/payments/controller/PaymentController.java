@@ -39,7 +39,7 @@ public class PaymentController {
     private static final String PAYLOAD= "payload";
     private final CoreServiceClient coreServiceClient;
     private final PaymentService paymentService;
-    private TransactionService transactionService;
+    private final TransactionService transactionService;
     private final SquareClient squareClient;
     private final PayUService payUService;
 
@@ -121,38 +121,6 @@ public class PaymentController {
         };
     }
 
-    @PostMapping("/callback/phonepe")
-    public ResponseEntity<PaymentResponse> handlePhonePeCallback(@RequestBody PhonePeCallbackDTO dto) {
-        PaymentResponse response = new PaymentResponse(
-                dto.getTransactionId(),
-                "PHONEPE",
-                dto.getStatus().equals("SUCCESS") ? "SUCCESS" : "FAILURE",
-                String.valueOf(dto.getAmount() / 100.0),   // convert paise to rupees
-                dto.getPaymentInstrument().getType(),
-                dto.getProviderReferenceId(),
-                "Payment via PhonePe",
-                LocalDateTime.now().toString()
-        );
-        return ResponseEntity.ok(response);
-    }
-
-    @PostMapping("/callback/paytm")
-    public ResponseEntity<PaymentResponse> handlePaytmCallback(@RequestBody PaytmCallbackDTO dto) {
-        PaymentResponse response = new PaymentResponse(
-                dto.getOrderId(),
-                "PAYTM",
-                dto.getStatus().equals("TXN_SUCCESS") ? "SUCCESS" : "FAILURE",
-                dto.getTxnAmount(),
-                dto.getPaymentMode(),
-                dto.getTxnId(),
-                dto.getMId(),
-                dto.getTxnDate()
-        );
-
-        paymentService.updatePaymentStatus(response);
-        return ResponseEntity.ok(response);
-    }
-
     @GetMapping("/{txnId}/status")
     public ResponseEntity<PaymentResponse> getStatus(@PathVariable String txnId) {
         PaymentResponse response = transactionService.getTransactionStatus(txnId);
@@ -210,34 +178,19 @@ public class PaymentController {
 
     // endpoints for success / failure callbacks
     @PostMapping("/payu/success")
-    @ResponseBody
     public ResponseEntity<String> handleSuccess(@RequestParam Map<String, String> params) throws Exception {
         // ✅ Step 1: Verify hash
-        String receivedHash = params.get("hash");
-        String txnid = params.get("txnid");
-        String amount = params.get("amount");
-        String productinfo = params.get("productinfo");
-        String firstname = params.get("firstname");
-        String email = params.get("email");
-
-        String hashString = merchantSalt + "|" + params.get("status") + "|||||||||||" + email + "|" +
-                firstname + "|" + productinfo + "|" + amount + "|" + txnid + "|" + merchantKey;
-
-        String calculatedHash = PayUService.hashSha512(hashString);
-
-        if (!calculatedHash.equals(receivedHash)) {
-            return ResponseEntity.badRequest().body("Hash verification failed!");
-        }
+        payUService.verifyTransactionHash(params);
 
         // ✅ Step 2: Update DB order status
-        // orderService.markPaid(txnid, params);
+        String txnId = params.get("txnid");
+        transactionService.updateTransactionStatus(txnId, "SUCCESS");
 
         // ✅ Step 3: Respond to PayU (backend confirmation)
         return ResponseEntity.ok("SUCCESS");
     }
 
     @PostMapping("/payu/failure")
-    @ResponseBody
     public String failure(@RequestParam Map<String, String> params) {
         // Verify hash, update DB, etc.
         return "PayU Failure: " + params.toString();

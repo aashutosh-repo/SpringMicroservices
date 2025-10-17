@@ -6,6 +6,13 @@ public class TransactionConstants {
     public static final int NEFT = 3;
     public static final int UPI = 4;
 
+    public static class TransactionType{
+        public static final String FUND_TRANSFER = "FUND_TRANSFER";
+        public static final String BILL_PAYMENT = "BILL_PAYMENT";
+        public static final String MOBILE_RECHARGE = "MOBILE_RECHARGE";
+        public static final String CASH_DEPOSIT = "CASH_DEPOSIT";
+        public static final String CASH_WITHDRAWAL = "CASH_WITHDRAWAL";
+    }
 
     public static final int CREDIT = 1;
     public static final int DEBIT = 2;

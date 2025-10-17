@@ -27,17 +27,22 @@ public class TransactionService {
     private final SequenceGenerator sequenceGenerator;
 
 
+    @Transactional
     public PaymentInitResponse initiateTransaction(TransactionDTO transactionDTO) {
 
         //Step1: Order Creation in Transaction Table with status INITIATED
         Transaction transaction = TransactionMapper.toEntity(transactionDTO);
         String transactionId = sequenceGenerator.generateSequence("transaction_sequence").toString();
-        transaction.setTransactionId(transactionId);
+        if(transaction.getTransactionId() == null || transaction.getTransactionId().isEmpty()){
+            transaction.setTransactionId(transactionId);
+        }
         transaction.setTransactionStatus(String.valueOf(TransactionConstants.TransactionStatus.INITIATED));
         transaction.setTransactionDatetime(LocalDateTime.now());
         transaction.setCreatedAt(LocalDateTime.now());
 
         log.info("Initiating transaction for Transaction: {}", transaction.getTransactionId());
+        transaction.setCustomerId("CUST12345"); //Mocked Customer ID
+        transaction.setTransactionType(TransactionConstants.TransactionType.FUND_TRANSFER);
         transactionsRepository.save(transaction);
 
         //step 2: Call Payment Gateway to process the payment
@@ -75,7 +80,7 @@ public class TransactionService {
     }
 
     public void updateTransactionStatus(String gatewayOrderId, String status) {
-        Transaction txn = transactionsRepository.findByExtRefId(gatewayOrderId)
+        Transaction txn = transactionsRepository.findById(gatewayOrderId)
                 .orElseThrow(() -> new RuntimeException("Transaction not found"));
         txn.setTransactionStatus(status);
         txn.setUpdatedAt(LocalDateTime.now());
