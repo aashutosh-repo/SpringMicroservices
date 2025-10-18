@@ -30,11 +30,11 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="FileHandler" options="-parameters" />
       <module name="account" options="-parameters" />
-      <module name="core" options="-parameters" />
+      <module name="core" options="" />
       <module name="customer" options="-parameters" />
       <module name="eureka" options="-parameters" />
       <module name="gateway" options="-parameters" />
-      <module name="payments" options="-parameters" />
+      <module name="payments" options="" />
       <module name="security" options="-parameters" />
     </option>
   </component>
