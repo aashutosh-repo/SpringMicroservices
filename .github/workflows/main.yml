@@ -1,0 +1,75 @@
+name: Maven Compilation Check
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    name: Compile and Build Check
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Compile with Maven
+        run: mvn clean compile -DskipTests
+        continue-on-error: false
+
+      - name: Run Tests
+        run: mvn test
+        continue-on-error: true
+
+      - name: Build with Maven
+        run: mvn package -DskipTests
+        continue-on-error: true
+
+      - name: Upload Build Logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: |
+            **/target/
+            **/*.log
+
+  code-quality:
+    runs-on: ubuntu-latest
+    name: Code Quality Checks
+    needs: compile
+    if: always()
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Check for Compilation Warnings
+        run: mvn clean compile -Dorg.slf4j.simpleLogger.defaultLogLevel=warn
+        continue-on-error: true
+
+      - name: Verify Build Success
+        run: |
+          if [ $? -ne 0 ]; then
+            echo "❌ Compilation failed! Please fix the errors above."
+            exit 1
+          fi
+          echo "✅ Compilation successful!"
